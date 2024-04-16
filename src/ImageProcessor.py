@@ -28,4 +28,3 @@ def load_image(parent: Canvas, image, size):
     parent.create_image(x, y, anchor=NW, image=photo)
     parent.image = photo
     return image
-

@@ -20,7 +20,6 @@ class Sizes(Enum):
     FEATURE_FRAME_WIDTH = 300
     FEATURE_FRAME_HEIGHT = 100
 
-
 class Strings(Enum):
     APP_TITLE = "Photoshop App"
     LOAD_BTN = "Tải ảnh"
@@ -39,6 +38,19 @@ class Strings(Enum):
     DRAW_BTN = "Vẽ"
     SMOOTHING_BTN = "Làm mịn"
     RED_EYE_BTN = "Mắt đỏ"
+    UPDATE_BTN = "Cập nhật"
+    FORMAT_BTN = "Định dạng"
+    CUSTOMIZE_BTN = "Điều chỉnh"
+    TEXT_BTN = "Chữ"
+    PEN_BTN = "Vẽ"
+    RED_BTN = "Đỏ"
+    BLUE_BTN = "Xanh dương"
+    YELLOW_BTN = "Vàng"
+    RED_FILTER_BTN = "Đỏ"
+    BLUE_FILTER_BTN = "Xanh dương"
+    YELLOW_FILTER_BTN = "Vàng"
+    PINK_FILTER_BTN = "Hồng"
+    GREEN_FILTER_BTN = "Xanh lá"
 
 class Colors(Enum):
     INIT_COLOR = "#000000"
@@ -47,7 +59,7 @@ class Colors(Enum):
     BACKGROUND_V3 = "#A27B5C"
     TEXT_COLOR = "#000000"
     TEXT_HIGHTLIGHT_COLOR = "#DCD7C9"
-    BTN_COLOR = "#2C3639"
+    BTN_COLOR = "#525455"
     BTN_HIGHTLIGHT_COLOR = "#A27B5C"
     BTN_BORDER_COLOR = "#3F4E4F"
     BORDER_COLOR = "#00224D"
