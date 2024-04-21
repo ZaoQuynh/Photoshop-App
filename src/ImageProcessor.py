@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import filedialog
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageEnhance
 
 def selected_image_path():
     file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.gif")])
@@ -28,3 +28,8 @@ def load_image(parent: Canvas, image, size):
     parent.create_image(x, y, anchor=NW, image=photo)
     parent.image = photo
     return image
+
+def saturation_feature(image, factor):
+    enhancer = ImageEnhance.Color(image)
+    saturated_image = enhancer.enhance(factor/50)
+    return saturated_image
