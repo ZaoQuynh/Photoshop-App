@@ -30,80 +30,109 @@ class PhotoshopApp(Tk):
     # Click button
 
     def on_click_format_button(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_customize_button(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_cut_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_rotate_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_resize_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_brightness_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_contrast_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_saturation_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
+    def saturation_processing(self, var = None, index= None, mode= None):
+        result = saturation_feature(self.selected_img, self.saturation_btn.frame.get_value())
+        self.load_image_into_edit(result)
+
     def on_click_blur__btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_sharpen_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_smoothing_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_draw_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_color_filter_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_blue_filter_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_pink_filter_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_yellow_filter_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_red_filter_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_green_filter_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_pen_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_red_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_blue_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_yellow_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_text_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     def on_click_red_eye_btn(self, button: FeatureButton):
+        self.show_selected()
         button.select_button()
 
     # Basic button
 
     def select_image(self):
+        self.restart()
         self.edit_step = []
         file_path = selected_image_path()
 
@@ -119,21 +148,21 @@ class PhotoshopApp(Tk):
 
     def update_image_into_selected(self):
         if self.temp_img is not None and self.temp_img != self.selected_img:
-            self.set_selected_img(self.temp_img)
             self.edit_step.append(self.selected_img)
+            self.set_selected_img(load_image(self.original_container, self.temp_img, Sizes.ORIGINAL_FRAME.value))
+            self.load_image_into_edit(self.temp_img)
             
     def export_image(self):
         if self.selected_img:
-            file_path = selected_image_path()
+            file_path = filedialog.asksaveasfilename(defaultextension=".png")
             if file_path:
                 self.selected_img.save(file_path, format='PNG')
                 print(f"Image saved to {file_path}")
 
     def undo(self):
         if(len(self.edit_step) > 0):
-            self.edit_step.pop()
             self.set_selected_img(self.edit_step.pop())
-            self.load_image_into_edit(self.selected_img)
+            self.show_selected()
 
     def restart(self):
         self.set_selected_img(None)
@@ -143,6 +172,11 @@ class PhotoshopApp(Tk):
         self.original_container.delete("all")
         self.selected_img_changed()
 
+    def show_selected(self):
+        self.set_selected_img(load_image(self.original_container, self.selected_img, Sizes.ORIGINAL_FRAME.value))
+        self.load_image_into_edit(self.selected_img)
+        self.temp_img = self.selected_img
+
     def run(self):
         self.mainloop()
 
@@ -151,8 +185,12 @@ class PhotoshopApp(Tk):
     def selected_img_changed(self):
         if self.selected_img != None:
             self.inner_frame.pack()
+            self.custom_container.pack()
+            self.choice_frame.pack()
         else:
             self.inner_frame.pack_forget()
+            self.custom_container.pack_forget()
+            self.choice_frame.pack_forget()
 
     # Draw View
 
@@ -301,13 +339,20 @@ class PhotoshopApp(Tk):
         contrast_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.CONTRAST_BTN.value, lambda: self.update_image_into_selected()))
         contrast_btn.config(command = lambda button=contrast_btn: self.on_click_contrast_btn(button))
 
-        saturation_btn = FeatureButton(customize_multi_frame, Strings.SATURATION_BTN.value, "images\ic_saturation_btn.png")
-        saturation_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.SATURATION_BTN.value, lambda: self.update_image_into_selected()))
-        saturation_btn.config(command = lambda button=saturation_btn: self.on_click_saturation_btn(button))
+        self.saturation_btn = FeatureButton(customize_multi_frame, Strings.SATURATION_BTN.value, "images\ic_saturation_btn.png")
+        self.saturation_btn.set_frame(
+            FeatureScaleFrame(
+                self.custom_container, 
+                Strings.SATURATION_BTN.value, 
+                lambda: self.update_image_into_selected(), 
+                lambda event, arg1, arg2: self.saturation_processing(),
+                arrange = [0,200], 
+                init_value=50))
+        self.saturation_btn.config(command = lambda button=self.saturation_btn: self.on_click_saturation_btn(button))
 
         customize_btns.append(brightness_btn)
         customize_btns.append(contrast_btn)
-        customize_btns.append(saturation_btn)
+        customize_btns.append(self.saturation_btn)
 
         customize_btn.get_frame().set_btns(customize_btns)
 

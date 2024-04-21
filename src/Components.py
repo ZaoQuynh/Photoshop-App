@@ -49,52 +49,55 @@ class MultilFeature(CTkFrame):
                 btn.hide_frame()
             self.pack_forget()
 
-   
-
 class FeatureScaleFrame(CTkFrame):
-    def __init__(self, parent: Frame, variable_name, cmd = None, arrange = [0,100], w = Sizes.FEATURE_FRAME_WIDTH.value , h = Sizes.FEATURE_FRAME_HEIGHT.value, background = Colors.BACKGROUND_V3.value):
+    def __init__(self, parent: Frame, variable_name, cmd_update = None, cmd_process = None, arrange = [0,100], init_value = 0, w = Sizes.FEATURE_FRAME_WIDTH.value , h = Sizes.FEATURE_FRAME_HEIGHT.value, background = Colors.BACKGROUND_V3.value):
         super().__init__(master=parent)
         self.pack_propagate(FALSE)
         self.parent = parent
         self.width = w
         self.height = h
         self.background = background
-        self.variable_value = 0
-        self.command = cmd
+        self.variable_value = StringVar()
+        self.command = cmd_update
+        self.init_value = init_value
 
         self.label_frame = Frame(self, width=self.width, height=30, background=self.background)
         self.label_frame.pack_propagate(FALSE)
         self.label_frame.pack(pady=5)
 
         self.label = Label(self.label_frame, text=variable_name, background=self.background)
-        self.label_value = Label(self.label_frame, background=self.background)
-
+        
+        if cmd_process is not None:
+            self.variable_value.trace_add('write', callback=cmd_process)
+        
+        self.label_value = Label(self.label_frame, background=self.background, textvariable=self.variable_value)
         step = arrange[1] - arrange[0]
-        self.scale = CTkSlider(self, from_=arrange[0], to=arrange[1], command=self.set_value, number_of_steps=step)
+        self.scale = CTkSlider(self, from_=arrange[0], to=arrange[1], number_of_steps=step, command=self.set_value)
 
         self.update_button = CTkButton(self, width=100, height=20, text=Strings.UPDATE_BTN.value)
 
-        if cmd is not None:
-            self.update_button.configure(command = cmd)
+        if cmd_update is not None:
+            self.update_button.configure(command = cmd_update)
 
         self.configure(width=self.width, height = self.height, fg_color = self.background)
         self.label.pack(side=LEFT, padx=20)
+        self.label_value.pack(side=RIGHT, padx=20)
         self.scale.pack(pady=5)
         self.update_button.pack()
+
+    # def on_text_changed(self, var, index, mode):
+    #     print("Change")
         
     def get_value(self):
-        return self.variable_value
+        return int(self.variable_value.get())
 
     def set_value(self, value):
-        self.variable_value = int(value)
-        self.label_value.config(text=f"{self.variable_value}")
-        self.label_value.pack(side=RIGHT)
+        int_value = int(value)
+        self.variable_value.set(str(int_value))
 
     def draw(self):
-        self.variable_value = 0
-        self.label_value.config(text = self.variable_value)
-        self.label_value.pack(side=RIGHT, padx=20)
-        self.scale.set(self.variable_value)
+        self.variable_value.set(str(self.init_value))
+        self.scale.set(int(self.variable_value.get()))
         self.pack()
 
     def destroy(self):
