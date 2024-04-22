@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import filedialog
 from PIL import Image, ImageTk, ImageEnhance
+import cv2
+import numpy as np
 
 def selected_image_path():
     file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.gif")])
@@ -33,3 +35,16 @@ def saturation_feature(image, factor):
     enhancer = ImageEnhance.Color(image)
     saturated_image = enhancer.enhance(factor/50)
     return saturated_image
+
+def sharpen_feature(image, sigma, strength=1.5, median_kernel_size=3):
+    sigma_ = sigma/10
+    
+    # Apply Unsharp Mask
+    image_np = np.array(image)
+    image_bgr = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
+    blurred = cv2.GaussianBlur(image_bgr, (0, 0), sigma_)
+    unsharp = cv2.addWeighted(image_bgr, 1.0 + strength, blurred, -strength, 0)
+    sharpened = Image.fromarray(cv2.cvtColor(unsharp, cv2.COLOR_BGR2RGB))
+
+    return sharpened
+

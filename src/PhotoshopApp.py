@@ -73,6 +73,10 @@ class PhotoshopApp(Tk):
         self.show_selected()
         button.select_button()
 
+    def sharpen_processing(self, var = None, index= None, mode= None):
+        result = sharpen_feature(self.selected_img, self.sharpen_btn.frame.get_value())
+        self.load_image_into_edit(result)
+
     def on_click_smoothing_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
@@ -360,9 +364,16 @@ class PhotoshopApp(Tk):
         blur_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.BLUR_BTN.value, lambda: self.update_image_into_selected()))
         blur_btn.config(command = lambda button=blur_btn: self.on_click_blur__btn(button))
 
-        sharpen_btn = FeatureButton(parent, Strings.SHARPEN_BTN.value, "images\ic_sharpen_btn.png")
-        sharpen_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.SHARPEN_BTN.value, lambda: self.update_image_into_selected()))
-        sharpen_btn.config(command = lambda button=sharpen_btn: self.on_click_sharpen_btn(button))
+        self.sharpen_btn = FeatureButton(parent, Strings.SHARPEN_BTN.value, "images\ic_sharpen_btn.png")
+        self.sharpen_btn.set_frame(
+            FeatureScaleFrame(
+                self.custom_container, 
+                Strings.SHARPEN_BTN.value, 
+                lambda: self.update_image_into_selected(), 
+                lambda event, arg1, arg2: self.sharpen_processing(),
+                arrange = [0,50], 
+                init_value=10))
+        self.sharpen_btn.config(command = lambda button=self.sharpen_btn: self.on_click_sharpen_btn(button))
 
         smoothing_btn = FeatureButton(parent, Strings.SMOOTHING_BTN.value, "images\ic_smoothing_btn.png")
         smoothing_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.SMOOTHING_BTN.value, lambda: self.update_image_into_selected()))
@@ -451,7 +462,7 @@ class PhotoshopApp(Tk):
         feature_btns.append(format_btn)
         feature_btns.append(customize_btn)
         feature_btns.append(blur_btn)
-        feature_btns.append(sharpen_btn)
+        feature_btns.append(self.sharpen_btn)
         feature_btns.append(smoothing_btn)
         feature_btns.append(color_filter_btn)
         feature_btns.append(draw_btn)
