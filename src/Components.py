@@ -2,6 +2,7 @@ from tkinter import *
 from Constraint import *
 from PIL import Image, ImageTk
 from customtkinter import *
+import time
 
 
 class ScrollHorizontalFrame(CTkScrollableFrame):
@@ -84,10 +85,7 @@ class FeatureScaleFrame(CTkFrame):
         self.label_value.pack(side=RIGHT, padx=20)
         self.scale.pack(pady=5)
         self.update_button.pack()
-
-    # def on_text_changed(self, var, index, mode):
-    #     print("Change")
-        
+       
     def get_value(self):
         return int(self.variable_value.get())
 
