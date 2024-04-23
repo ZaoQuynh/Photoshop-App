@@ -33,21 +33,21 @@ def load_image(parent: Canvas, image, size):
 
 def saturation_feature(image, factor):
     enhancer = ImageEnhance.Color(image)
-    saturated_image = enhancer.enhance(factor/50)
+    saturated_image = enhancer.enhance(1 + factor/50)
     return saturated_image
 
 def brightness_feature(image, factor):
     enhancer = ImageEnhance.Brightness(image)
-    brightened_image = enhancer.enhance(1 + factor/100)
+    brightened_image = enhancer.enhance(1 + factor/50)
     return brightened_image
 
 def contrast_feature(image, factor):
     enhancer = ImageEnhance.Contrast(image)
-    contrasted_image = enhancer.enhance(1 + factor/100)
+    contrasted_image = enhancer.enhance(1 + factor/50)
     return contrasted_image
 
 def sharpen_feature(image, sigma, strength=1.5, median_kernel_size=3):
-    sigma_ = sigma/10
+    sigma_ = 1 + sigma/10
     
     # Apply Unsharp Mask
     image_np = np.array(image)

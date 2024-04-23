@@ -348,8 +348,8 @@ class PhotoshopApp(Tk):
                 Strings.BRIGHTNESS_BTN.value, 
                 lambda: self.update_image_into_selected(),
                 lambda event, arg1, arg2: self.brightness_processing(),
-                arrange = [0,200], 
-                init_value=50))
+                range = [-50, 50], 
+                init_value = 0))
         
         self.brightness_btn.config(command = lambda button=self.brightness_btn: self.on_click_brightness_btn(button))
 
@@ -359,8 +359,8 @@ class PhotoshopApp(Tk):
                 self.custom_container, Strings.CONTRAST_BTN.value,
                 lambda: self.update_image_into_selected(),
                 lambda event, arg1, arg2: self.contrast_processing(),
-                arrange = [0,200], 
-                init_value=50))
+                range = [-50, 50], 
+                init_value = 0))
         self.contrast_btn.config(command = lambda button= self.contrast_btn: self.on_click_contrast_btn(button))
 
         self.saturation_btn = FeatureButton(customize_multi_frame, Strings.SATURATION_BTN.value, "images\ic_saturation_btn.png")
@@ -370,8 +370,8 @@ class PhotoshopApp(Tk):
                 Strings.SATURATION_BTN.value, 
                 lambda: self.update_image_into_selected(), 
                 lambda event, arg1, arg2: self.saturation_processing(),
-                arrange = [0,200], 
-                init_value=50))
+                range = [-50, 50], 
+                init_value = 0))
         self.saturation_btn.config(command = lambda button=self.saturation_btn: self.on_click_saturation_btn(button))
         
 
@@ -392,8 +392,8 @@ class PhotoshopApp(Tk):
                 Strings.SHARPEN_BTN.value, 
                 lambda: self.update_image_into_selected(), 
                 lambda event, arg1, arg2: self.sharpen_processing(),
-                arrange = [0,50], 
-                init_value=10))
+                range = [0,50], 
+                init_value = 0))
         self.sharpen_btn.config(command = lambda button=self.sharpen_btn: self.on_click_sharpen_btn(button))
 
         smoothing_btn = FeatureButton(parent, Strings.SMOOTHING_BTN.value, "images\ic_smoothing_btn.png")
