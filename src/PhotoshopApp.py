@@ -22,7 +22,6 @@ class PhotoshopApp(Tk):
 
         self.main_view()
 
-
     def set_selected_img(self, value):
         self.selected_img = value
         self.selected_img_changed()
@@ -45,6 +44,12 @@ class PhotoshopApp(Tk):
         self.show_selected()
         button.select_button()
 
+    def on_click_rotate_minus_90_button(self, button: FeatureButton):
+        self.show_selected()
+
+    def on_click_rotate_90_button(self, button: FeatureButton):
+        self.show_selected()
+
     def on_click_resize_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
@@ -52,6 +57,7 @@ class PhotoshopApp(Tk):
     def on_click_brightness_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
+    
     def brightness_processing(self, var = None, index = None, mode = None):
         result = brightness_feature(self.selected_img, self.brightness_btn.frame.get_value())
         self.load_image_into_edit(result)
@@ -59,6 +65,7 @@ class PhotoshopApp(Tk):
     def on_click_contrast_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
+    
     def contrast_processing(self, var = None, index= None, mode= None):
         result = contrast_feature(self.selected_img, self.contrast_btn.frame.get_value())
         self.load_image_into_edit(result)
@@ -135,10 +142,6 @@ class PhotoshopApp(Tk):
         self.show_selected()
         button.select_button()
 
-    def on_click_red_eye_btn(self, button: FeatureButton):
-        self.show_selected()
-        button.select_button()
-
     # Basic button
 
     def select_image(self):
@@ -161,6 +164,11 @@ class PhotoshopApp(Tk):
             self.edit_step.append(self.selected_img)
             self.set_selected_img(load_image(self.original_container, self.temp_img, Sizes.ORIGINAL_FRAME.value))
             self.load_image_into_edit(self.temp_img)
+
+    def update_image_into_selected_and_reset_button(self, button):
+        self.update_image_into_selected()
+        button.frame.draw()
+            
             
     def export_image(self):
         if self.selected_img:
@@ -319,13 +327,28 @@ class PhotoshopApp(Tk):
         cut_btn.config(command = lambda button=cut_btn: self.on_click_cut_btn(button))
         
         rotation_btn = FeatureButton(format_multi_frame, Strings.ROTATION_BTN.value, "images\icon_rotate_btn.png")
+        rotation_multi_frame = MultilFeature(self.custom_container)
+        rotation_btn.set_frame(rotation_multi_frame)
         rotation_btn.config(command = lambda button=rotation_btn: self.on_click_rotate_btn(button))
+
+        rotation_btns = []
+
+        rotate_90_button  = FeatureButton(rotation_multi_frame, Strings.ROTATE_90_BTN.value, "images\ic_rotate_90.png")
+        rotate_90_button .config(command = lambda button=rotate_90_button: self.on_click_rotate_90_button(button))
+
+        rotate_minus_90_button = FeatureButton(rotation_multi_frame, Strings.ROTATE_MINUS_90_BTN.value, "images\ic_rotate_minus_90.png")
+        rotate_minus_90_button .config(command = lambda button=rotate_minus_90_button: self.on_click_rotate_minus_90_button(button))
+
+        rotation_btns.append(rotate_90_button)
+        rotation_btns.append(rotate_minus_90_button)
+
+        rotation_btn.get_frame().set_btns(rotation_btns)
 
         resize_btn = FeatureButton(format_multi_frame, Strings.SCALING_BTN.value, "images\icon_resize_btn.png")
         resize_btn.config(command = lambda button=resize_btn: self.on_click_resize_btn(button))
         
         format_btn_update = FeatureButton(format_multi_frame, Strings.UPDATE_BTN.value, "images\ic_update_btn.png")
-        format_btn_update.config(command = lambda button=format_btn_update: self.update_image_into_selected())
+        format_btn_update.config(command = lambda: self.update_image_into_selected())
 
         format_btns.append(cut_btn)
         format_btns.append(rotation_btn)
@@ -346,7 +369,7 @@ class PhotoshopApp(Tk):
             FeatureScaleFrame(
                 self.custom_container,
                 Strings.BRIGHTNESS_BTN.value, 
-                lambda: self.update_image_into_selected(),
+                lambda button=self.brightness_btn: self.update_image_into_selected_and_reset_button(button),
                 lambda event, arg1, arg2: self.brightness_processing(),
                 range = [-50, 50], 
                 init_value = 0))
@@ -357,7 +380,7 @@ class PhotoshopApp(Tk):
         self.contrast_btn.set_frame(
             FeatureScaleFrame(
                 self.custom_container, Strings.CONTRAST_BTN.value,
-                lambda: self.update_image_into_selected(),
+                lambda button= self.contrast_btn: self.update_image_into_selected_and_reset_button(button),
                 lambda event, arg1, arg2: self.contrast_processing(),
                 range = [-50, 50], 
                 init_value = 0))
@@ -368,7 +391,7 @@ class PhotoshopApp(Tk):
             FeatureScaleFrame(
                 self.custom_container, 
                 Strings.SATURATION_BTN.value, 
-                lambda: self.update_image_into_selected(), 
+                lambda button=self.saturation_btn: self.update_image_into_selected_and_reset_button(button), 
                 lambda event, arg1, arg2: self.saturation_processing(),
                 range = [-50, 50], 
                 init_value = 0))
@@ -382,7 +405,7 @@ class PhotoshopApp(Tk):
         customize_btn.get_frame().set_btns(customize_btns)
 
         blur_btn = FeatureButton(parent, Strings.BLUR_BTN.value, "images\ic_blur_btn.png")
-        blur_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.BLUR_BTN.value, lambda: self.update_image_into_selected()))
+        blur_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.BLUR_BTN.value, lambda button=blur_btn: self.update_image_into_selected_and_reset_button(button)))
         blur_btn.config(command = lambda button=blur_btn: self.on_click_blur__btn(button))
 
         self.sharpen_btn = FeatureButton(parent, Strings.SHARPEN_BTN.value, "images\ic_sharpen_btn.png")
@@ -390,14 +413,14 @@ class PhotoshopApp(Tk):
             FeatureScaleFrame(
                 self.custom_container, 
                 Strings.SHARPEN_BTN.value, 
-                lambda: self.update_image_into_selected(), 
+                lambda button=self.sharpen_btn: self.update_image_into_selected_and_reset_button(button), 
                 lambda event, arg1, arg2: self.sharpen_processing(),
                 range = [0,50], 
                 init_value = 0))
         self.sharpen_btn.config(command = lambda button=self.sharpen_btn: self.on_click_sharpen_btn(button))
 
         smoothing_btn = FeatureButton(parent, Strings.SMOOTHING_BTN.value, "images\ic_smoothing_btn.png")
-        smoothing_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.SMOOTHING_BTN.value, lambda: self.update_image_into_selected()))
+        smoothing_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.SMOOTHING_BTN.value, lambda button=smoothing_btn: self.update_image_into_selected_and_reset_button(button)))
         smoothing_btn.config(command = lambda button=smoothing_btn: self.on_click_smoothing_btn(button))
 
         color_filter_btn = FeatureButton(parent, Strings.COLOR_FILTER_BTN.value, "images\ic_color_filter_btn.png")
@@ -408,23 +431,23 @@ class PhotoshopApp(Tk):
         color_filter_btns = []
 
         red_filter_btn = FeatureButton(color_filter_multi_frame, Strings.RED_FILTER_BTN.value, "images\ic_red_filter_btn.png")
-        red_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.BRIGHTNESS_BTN.value, lambda: self.update_image_into_selected()))
+        red_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.RED_FILTER_BTN.value, lambda button=red_filter_btn: self.update_image_into_selected_and_reset_button(button)))
         red_filter_btn.config(command = lambda button=red_filter_btn: self.on_click_red_filter_btn(button))
         
         blue_filter_btn = FeatureButton(color_filter_multi_frame, Strings.BLUE_FILTER_BTN.value, "images\ic_blue_filter_btn.png")
-        blue_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.BRIGHTNESS_BTN.value, lambda: self.update_image_into_selected()))
+        blue_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.BLUE_FILTER_BTN.value, lambda button=blue_filter_btn: self.update_image_into_selected_and_reset_button(button)))
         blue_filter_btn.config(command = lambda button=blue_filter_btn: self.on_click_blue_filter_btn(button))
         
         yellow_filter_btn = FeatureButton(color_filter_multi_frame, Strings.YELLOW_FILTER_BTN.value, "images\ic_yellow_filter_btn.png")
-        yellow_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.BRIGHTNESS_BTN.value, lambda: self.update_image_into_selected()))
+        yellow_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.YELLOW_FILTER_BTN.value, lambda button=yellow_filter_btn: self.update_image_into_selected_and_reset_button(button)))
         yellow_filter_btn.config(command = lambda button=yellow_filter_btn: self.on_click_yellow_filter_btn(button))
         
         pink_filter_btn = FeatureButton(color_filter_multi_frame, Strings.PINK_FILTER_BTN.value, "images\ic_pink_filter_btn.png")
-        pink_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.BRIGHTNESS_BTN.value, lambda: self.update_image_into_selected()))
+        pink_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.PINK_FILTER_BTN.value, lambda button=pink_filter_btn: self.update_image_into_selected_and_reset_button(button)))
         pink_filter_btn.config(command = lambda button=pink_filter_btn: self.on_click_pink_filter_btn(button))
 
         green_filter_btn = FeatureButton(color_filter_multi_frame, Strings.GREEN_FILTER_BTN.value, "images\ic_green_filter_btn.png")
-        green_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.BRIGHTNESS_BTN.value, lambda: self.update_image_into_selected()))
+        green_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.GREEN_FILTER_BTN.value, lambda button=green_filter_btn: self.update_image_into_selected_and_reset_button(button)))
         green_filter_btn.config(command = lambda button=green_filter_btn: self.on_click_green_filter_btn(button))
 
         color_filter_btns.append(red_filter_btn)
@@ -468,16 +491,13 @@ class PhotoshopApp(Tk):
         text_btn.config(command = lambda button=text_btn: self.on_click_text_btn(button))
 
         draw_btn_update = FeatureButton(draw_multi_frame, Strings.UPDATE_BTN.value, "images\ic_update_btn.png")
-        draw_btn_update.config(command = lambda button=draw_btn_update: self.update_image_into_selected())
+        draw_btn_update.config(command = lambda: self.update_image_into_selected())
 
         draw_btns.append(pen_btn)
         draw_btns.append(text_btn)
         draw_btns.append(draw_btn_update)
 
         draw_btn.get_frame().set_btns(draw_btns)
-
-        red_eye_btn = FeatureButton(parent, Strings.RED_EYE_BTN.value, "images\ic_red_eye_btn.png")
-        red_eye_btn.config(command = lambda button=red_eye_btn: self.on_click_red_eye_btn(button))
 
         feature_btns = []
         feature_btns.append(format_btn)
@@ -487,7 +507,6 @@ class PhotoshopApp(Tk):
         feature_btns.append(smoothing_btn)
         feature_btns.append(color_filter_btn)
         feature_btns.append(draw_btn)
-        feature_btns.append(red_eye_btn)
 
         parent.set_btns(feature_btns)
 
