@@ -3,6 +3,7 @@ from tkinter import filedialog
 from PIL import Image, ImageTk, ImageEnhance
 import cv2
 import numpy as np
+from Components import *
 
 def selected_image_path():
     file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.gif")])
@@ -30,6 +31,31 @@ def load_image(parent: Canvas, image, w, h):
     parent.create_image(x, y, anchor=NW, image=photo)
     parent.image = photo
     return image
+
+def load_gif_into_frame(parent: Canvas, gif , w, background = Colors.BACKGROUND.value):
+    gif = Image.open("gifs\_background.gif")
+
+    frames = []
+    while True:
+        try:
+            gif.seek(len(frames))
+            frame = gif.copy()
+            _w, _h = frame.size
+            w_new, h_new = w, int((w * _h)/_w)
+            frame = frame.resize((w_new, h_new), Image.BICUBIC)
+            frames.append(ImageTk.PhotoImage(frame))
+        except EOFError:
+            break
+
+    label = Label(parent, width=w, background=background)
+    label.pack()
+
+    def update_frame(idx):
+        frame = frames[idx]
+        label.config(image=frame)
+        parent.after(50, update_frame, (idx + 1) % len(frames))
+    
+    update_frame(0)
 
 def saturation_feature(image, factor):
     '''

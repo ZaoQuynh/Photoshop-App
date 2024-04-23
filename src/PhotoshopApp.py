@@ -5,10 +5,7 @@ from Components import *
 from ImageProcessor import *
 from tkinter import messagebox
 from PIL import Image, ImageTk
-
-"""
-Lớp giao diện chính của phần mềm
-"""
+import webbrowser
 
 class PhotoshopApp(Tk):
     def __init__(self):
@@ -16,6 +13,7 @@ class PhotoshopApp(Tk):
         self.title(Strings.APP_TITLE.value)
         self.geometry(f"{Sizes.WIDTH.value}x{Sizes.HEIGHT.value}")
         self.resizable(False, False)
+        self.iconbitmap("images\logo.ico")
         self.config(bg= Colors.BACKGROUND.value)
         self.temp_img = None
         self.selected_img_path = None
@@ -205,6 +203,7 @@ class PhotoshopApp(Tk):
         if(len(self.edit_step) > 0):
             self.set_selected_img(self.edit_step.pop())
             self.show_selected()
+            print("Undo")
 
     def restart(self):
         self.set_selected_img(None)
@@ -227,8 +226,12 @@ class PhotoshopApp(Tk):
 
     def selected_img_changed(self):
         if self.selected_img != None:
+            self.start_frame.pack_forget()
+            self.processing_panel.pack(side="right", fill="both", expand=True)
             self.inner_frame.draw()
         else:
+            self.processing_panel.pack_forget()
+            self.start_frame.pack(side="right", fill="both", expand=True)
             self.inner_frame.destroy()
 
     def resize_processing(self):
@@ -266,12 +269,15 @@ class PhotoshopApp(Tk):
         control_panel.pack_propagate(False)
         self.draw_control_panel(control_panel)
 
-        processing_panel = Frame(self, 
+        self.processing_panel = Frame(self, 
                                  width=Sizes.WIDTH_RIGHT.value,  
                                  bg=Colors.BACKGROUND.value)
-        processing_panel.pack(side="right", fill="both", expand=True)
-        processing_panel.pack_propagate(False)
-        self.draw_processing_panel(processing_panel)
+        self.processing_panel.pack(side="right", fill="both", expand=True)
+        self.processing_panel.pack_propagate(False)
+        self.draw_processing_panel(self.processing_panel)
+        self.processing_panel.pack_forget()
+        
+        self.draw_start_window()
         
     def draw_control_panel(self, parent):
         load_btn = CTkButton(parent, 
@@ -307,7 +313,7 @@ class PhotoshopApp(Tk):
         restart_btn.pack(side=TOP, 
                       padx=10,
                       pady=5)
-
+        
     def draw_processing_panel(self, parent):
         main_panel = Frame(parent, 
                               height=Sizes.HEIGHT_TOP.value, 
@@ -337,6 +343,7 @@ class PhotoshopApp(Tk):
         self.original_container = Canvas(left_frame, width=Sizes.ORIGINAL_FRAME.value, height=Sizes.ORIGINAL_FRAME.value,
                               bg=Colors.BACKGROUND_V2.value)
         self.original_container.pack(side=TOP, padx=15, pady=10)
+        self.original_container.pack_propagate(False)
 
         self.custom_container = Canvas(left_frame, width=Sizes.FEATURE_FRAME_WIDTH.value, height=Sizes.FEATURE_FRAME_HEIGHT.value,
                               bg=Colors.BACKGROUND.value, highlightthickness=0)
@@ -350,6 +357,7 @@ class PhotoshopApp(Tk):
         self.edit_container = Canvas(right_frame, width=Sizes.EDIT_FRAME.value, height=Sizes.EDIT_FRAME.value,
                               bg=Colors.BACKGROUND_V2.value)
         self.edit_container.pack(padx=10, pady=10)
+        self.edit_container.pack_propagate(False)
 
         self.choice_frame = Frame(parent, width=950, height=100,
                               bg=Colors.BACKGROUND.value)
@@ -360,6 +368,80 @@ class PhotoshopApp(Tk):
         self.inner_frame = MultilFeature(parent)
 
         self.create_feature_button(self.inner_frame)
+
+    def draw_start_window(self):
+        self.start_frame = Frame(self, 
+                                 width=Sizes.WIDTH_RIGHT.value,  
+                                 bg=Colors.BACKGROUND.value)
+        self.start_frame.pack(side="right", fill="both", expand=True)
+        self.start_frame.pack_propagate(False)
+
+        #Background
+        load_gif_into_frame(self.start_frame, "gifs\_background.gif", Sizes.WIDTH_RIGHT.value)
+
+
+        infor_frame = CTkFrame(self.start_frame, bg_color=Colors.BACKGROUND_V2.value)
+        infor_frame.pack(expand = True, anchor = "se", pady = 20, padx = 20)
+
+        infor_frame_right = CTkFrame(infor_frame) 
+        infor_frame_right.pack(side = RIGHT, pady = 5, padx = 5)
+
+        group_name = CTkLabel(infor_frame_right, text="--- Nhóm 7 ---", font=("Helvetica", 14, "bold"))
+        group_name.grid(row=0, column=0, columnspan=2, padx=5, pady=2)
+
+        member1 = CTkLabel(infor_frame_right, text="Nguyễn Hà Quỳnh Giao")
+        member1.grid(row=1, column=0, padx=10, pady=2)
+
+        member1_id = CTkLabel(infor_frame_right, text="21110171")
+        member1_id.grid(row=1, column=1, padx=10, pady=2)
+
+        member2 = CTkLabel(infor_frame_right, text="Lê Tân")
+        member2.grid(row=2, column=0, padx=10, pady=2)
+
+        member2_id = CTkLabel(infor_frame_right, text="21110296")
+        member2_id.grid(row=2, column=1, padx=10, pady=2)
+
+        member3 = CTkLabel(infor_frame_right, text="Hoàng Công Mạnh")
+        member3.grid(row=3, column=0, padx=10, pady=2)
+
+        member3_id = CTkLabel(infor_frame_right, text="21110839")
+        member3_id.grid(row=3, column=1, padx=10, pady=2)
+
+        infor_frame_left = CTkFrame(infor_frame)
+        infor_frame_left.pack( pady = 5, padx = 5, side=LEFT)
+
+        schoool_image = ImageTk.PhotoImage(Image.open("images\ic_school.png").resize((20, 25), Image.BICUBIC))
+
+        schoool_label = Label(infor_frame_left, image=schoool_image, background=Colors.BACKGROUND_V4.value)
+        schoool_label.grid(row=0, column=0, padx=10, pady=2)
+        schoool_label.photo = schoool_image
+
+        school_infor = CTkLabel(infor_frame_left, text="Trường Đại Học Sư Phạm Kỹ Thuật TP.HCM")
+        school_infor.grid(row=0, column=1, padx=10, pady=2)
+
+        subject_label = CTkLabel(infor_frame_left, text="Môn:")
+        subject_label.grid(row=1, column=0, padx=10, pady=2)
+
+        subject_infor = CTkLabel(infor_frame_left, text="Xử lý ảnh số")
+        subject_infor.grid(row=1, column=1, padx=10, pady=2)
+
+        teacher_label = CTkLabel(infor_frame_left, text="GVHD:")
+        teacher_label.grid(row=2, column=0, padx=10, pady=2)
+
+        teacher_infor = CTkLabel(infor_frame_left, text="PGS.TS Hoàng Văn Dũng")
+        teacher_infor.grid(row=2, column=1, padx=10, pady=2)
+
+        github_image = ImageTk.PhotoImage(Image.open("images\ic_github.png").resize((20, 20), Image.BICUBIC))
+
+        github_label = Label(infor_frame_left, image=github_image, background=Colors.BACKGROUND_V4.value)
+        github_label.grid(row=3, column=0, padx=10, pady=2)
+        github_label.photo = github_image
+
+        github_contact = CTkButton(infor_frame_left, text="Github", command=self.visit_github)
+        github_contact.grid(row=3, column=1, padx=10, pady=2)
+    
+    def visit_github(self):
+        webbrowser.open("https://github.com/ZaoQuynh/Photoshop-App")
 
     def create_feature_button(self, parent):
         format_btn = FeatureButton(parent, Strings.FORMAT_BTN.value, "images\ic_format_btn.png")
@@ -625,6 +707,3 @@ class PhotoshopApp(Tk):
         feature_btns.append(draw_btn)
 
         parent.set_btns(feature_btns)
-
-
-    
