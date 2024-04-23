@@ -68,12 +68,26 @@ def contrast_feature(image, factor):
     return contrasted_image
 
 def sharpen_feature(image, sigma, strength=1.5, median_kernel_size=3):
-    sigma_ = 1 + sigma/10
-    
-    # Apply Unsharp Mask
+
+    '''
+    Tăng độ sắc nét cho hình ảnh
+
+    Kỹ thuật: Unsharp Masking
+
+    Input: 
+    - selected_image: ảnh đang được chọn
+    - factor: chỉ số điều chỉnh độ sắc nét.
+            + factor = 0: ảnh gốc
+            + factor > 0: tăng độ sắc nét
+            + factor < 0: giảm độ sắc nét
+
+    Output: hình ảnh sau khi xử lý tăng độ sắc nét.
+    '''
+
+    sharpen_factor = 1 + sigma/10
     image_np = np.array(image)
     image_bgr = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
-    blurred = cv2.GaussianBlur(image_bgr, (0, 0), sigma_)
+    blurred = cv2.GaussianBlur(image_bgr, (0, 0), sharpen_factor)
     unsharp = cv2.addWeighted(image_bgr, 1.0 + strength, blurred, -strength, 0)
     sharpened = Image.fromarray(cv2.cvtColor(unsharp, cv2.COLOR_BGR2RGB))
 
