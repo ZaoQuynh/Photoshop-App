@@ -32,8 +32,29 @@ def load_image(parent: Canvas, image, size):
     return image
 
 def saturation_feature(image, factor):
-    enhancer = ImageEnhance.Color(image)
-    saturated_image = enhancer.enhance(1 + factor/50)
+    '''
+    Điều chỉnh độ bảo hòa của ảnh
+
+    Kỹ thuật: Cân bằng histogram toàn cục
+
+    Input: 
+    - selected_image: ảnh đang được chọn
+    - factor: chỉ số điều chỉnh bảo hòa.
+            + factor = 0: ảnh gốc
+            + factor > 0: tăng độ bảo hòa
+            + factor < 0: giảm độ bảo hòa
+
+    Output: hình ảnh sau khi xử lý bảo hòa.
+    '''
+    saturation_factor = 1 + factor/50
+    img_arr = np.array(image)
+
+    img_cvt = cv2.cvtColor(img_arr, cv2.COLOR_BGR2HSV)
+    img_cvt[:,:,1] = np.clip(img_cvt[:,:,1] * saturation_factor, 0, 255)
+
+    saturated_array = cv2.cvtColor(img_cvt, cv2.COLOR_HSV2BGR)
+    saturated_image = Image.fromarray(saturated_array)
+
     return saturated_image
 
 def brightness_feature(image, factor):
