@@ -36,6 +36,16 @@ def saturation_feature(image, factor):
     saturated_image = enhancer.enhance(factor/50)
     return saturated_image
 
+def brightness_feature(image, factor):
+    enhancer = ImageEnhance.Brightness(image)
+    brightened_image = enhancer.enhance(1 + factor/100)
+    return brightened_image
+
+def contrast_feature(image, factor):
+    enhancer = ImageEnhance.Contrast(image)
+    contrasted_image = enhancer.enhance(1 + factor/100)
+    return contrasted_image
+
 def sharpen_feature(image, sigma, strength=1.5, median_kernel_size=3):
     sigma_ = sigma/10
     

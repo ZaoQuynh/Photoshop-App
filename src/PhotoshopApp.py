@@ -52,10 +52,16 @@ class PhotoshopApp(Tk):
     def on_click_brightness_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
+    def brightness_processing(self, var = None, index = None, mode = None):
+        result = brightness_feature(self.selected_img, self.brightness_btn.frame.get_value())
+        self.load_image_into_edit(result)
 
     def on_click_contrast_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
+    def contrast_processing(self, var = None, index= None, mode= None):
+        result = contrast_feature(self.selected_img, self.contrast_btn.frame.get_value())
+        self.load_image_into_edit(result)
 
     def on_click_saturation_btn(self, button: FeatureButton):
         self.show_selected()
@@ -335,13 +341,27 @@ class PhotoshopApp(Tk):
 
         customize_btns = []
 
-        brightness_btn = FeatureButton(customize_multi_frame, Strings.BRIGHTNESS_BTN.value, "images\ic_brightness_btn.png")
-        brightness_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.BRIGHTNESS_BTN.value, lambda: self.update_image_into_selected()))
-        brightness_btn.config(command = lambda button=brightness_btn: self.on_click_brightness_btn(button))
+        self.brightness_btn = FeatureButton(customize_multi_frame, Strings.BRIGHTNESS_BTN.value, "images\ic_brightness_btn.png")
+        self.brightness_btn.set_frame(
+            FeatureScaleFrame(
+                self.custom_container,
+                Strings.BRIGHTNESS_BTN.value, 
+                lambda: self.update_image_into_selected(),
+                lambda event, arg1, arg2: self.brightness_processing(),
+                arrange = [0,200], 
+                init_value=50))
+        
+        self.brightness_btn.config(command = lambda button=self.brightness_btn: self.on_click_brightness_btn(button))
 
-        contrast_btn = FeatureButton(customize_multi_frame, Strings.CONTRAST_BTN.value, "images\ic_contrast_btn.png")
-        contrast_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.CONTRAST_BTN.value, lambda: self.update_image_into_selected()))
-        contrast_btn.config(command = lambda button=contrast_btn: self.on_click_contrast_btn(button))
+        self.contrast_btn = FeatureButton(customize_multi_frame, Strings.CONTRAST_BTN.value, "images\ic_contrast_btn.png")
+        self.contrast_btn.set_frame(
+            FeatureScaleFrame(
+                self.custom_container, Strings.CONTRAST_BTN.value,
+                lambda: self.update_image_into_selected(),
+                lambda event, arg1, arg2: self.contrast_processing(),
+                arrange = [0,200], 
+                init_value=50))
+        self.contrast_btn.config(command = lambda button= self.contrast_btn: self.on_click_contrast_btn(button))
 
         self.saturation_btn = FeatureButton(customize_multi_frame, Strings.SATURATION_BTN.value, "images\ic_saturation_btn.png")
         self.saturation_btn.set_frame(
@@ -353,9 +373,10 @@ class PhotoshopApp(Tk):
                 arrange = [0,200], 
                 init_value=50))
         self.saturation_btn.config(command = lambda button=self.saturation_btn: self.on_click_saturation_btn(button))
+        
 
-        customize_btns.append(brightness_btn)
-        customize_btns.append(contrast_btn)
+        customize_btns.append(self.brightness_btn)
+        customize_btns.append(self.contrast_btn)
         customize_btns.append(self.saturation_btn)
 
         customize_btn.get_frame().set_btns(customize_btns)
