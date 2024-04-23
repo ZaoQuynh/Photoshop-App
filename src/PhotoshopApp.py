@@ -111,21 +111,41 @@ class PhotoshopApp(Tk):
         self.show_selected()
         button.select_button()
 
+    def blue_filter_processing(self, var = None, index= None, mode= None):
+        result = color_filter(self.selected_img, 0, 3, 1, self.blue_filter_btn.frame.get_value())
+        self.load_image_into_edit(result)
+
     def on_click_pink_filter_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
 
+    def pink_filter_processing(self, var = None, index= None, mode= None):
+        result = color_filter(self.selected_img, 2, 0, 1, self.pink_filter_btn.frame.get_value())
+        self.load_image_into_edit(result)
+
     def on_click_yellow_filter_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
+    
+    def yellow_filter_processing(self, var = None, index= None, mode= None):
+        result = color_filter(self.selected_img, 2, 1, 1, self.yellow_filter_btn.frame.get_value())
+        self.load_image_into_edit(result)
 
     def on_click_red_filter_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
 
+    def red_filter_processing(self, var = None, index= None, mode= None):
+        result = color_filter(self.selected_img, 2, 3, 1, self.red_filter_btn.frame.get_value())
+        self.load_image_into_edit(result)
+
     def on_click_green_filter_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
+
+    def green_filter_processing(self, var = None, index= None, mode= None):
+        result = color_filter(self.selected_img, 1, 3, 1, self.green_filter_btn.frame.get_value())
+        self.load_image_into_edit(result)
 
     def on_click_pen_btn(self, button: FeatureButton):
         self.show_selected()
@@ -491,31 +511,66 @@ class PhotoshopApp(Tk):
 
         color_filter_btns = []
 
-        red_filter_btn = FeatureButton(color_filter_multi_frame, Strings.RED_FILTER_BTN.value, "images\ic_red_filter_btn.png")
-        red_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.RED_FILTER_BTN.value, lambda button=red_filter_btn: self.update_image_into_selected_and_reset_button(button)))
-        red_filter_btn.config(command = lambda button=red_filter_btn: self.on_click_red_filter_btn(button))
+        self.red_filter_btn = FeatureButton(color_filter_multi_frame, Strings.RED_FILTER_BTN.value, "images\ic_red_filter_btn.png")
+        self.red_filter_btn.set_frame(
+            FeatureScaleFrame(
+                self.custom_container, 
+                Strings.RED_FILTER_BTN.value, 
+                lambda button=self.red_filter_btn: self.update_image_into_selected_and_reset_button(button),
+                lambda event, arg1, arg2: self.red_filter_processing(),
+                range = [0,15], 
+                init_value = 0))
+        self.red_filter_btn.config(command = lambda button=self.red_filter_btn: self.on_click_red_filter_btn(button))
         
-        blue_filter_btn = FeatureButton(color_filter_multi_frame, Strings.BLUE_FILTER_BTN.value, "images\ic_blue_filter_btn.png")
-        blue_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.BLUE_FILTER_BTN.value, lambda button=blue_filter_btn: self.update_image_into_selected_and_reset_button(button)))
-        blue_filter_btn.config(command = lambda button=blue_filter_btn: self.on_click_blue_filter_btn(button))
+        self.blue_filter_btn = FeatureButton(color_filter_multi_frame, Strings.BLUE_FILTER_BTN.value, "images\ic_blue_filter_btn.png")
+        self.blue_filter_btn.set_frame(
+            FeatureScaleFrame(
+                self.custom_container, 
+                Strings.BLUE_FILTER_BTN.value, 
+                lambda button=self.blue_filter_btn: self.update_image_into_selected_and_reset_button(button),
+                lambda event, arg1, arg2: self.blue_filter_processing(),
+                range = [0,15], 
+                init_value = 0))
+        self.blue_filter_btn.config(command = lambda button=self.blue_filter_btn: self.on_click_blue_filter_btn(button))
         
-        yellow_filter_btn = FeatureButton(color_filter_multi_frame, Strings.YELLOW_FILTER_BTN.value, "images\ic_yellow_filter_btn.png")
-        yellow_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.YELLOW_FILTER_BTN.value, lambda button=yellow_filter_btn: self.update_image_into_selected_and_reset_button(button)))
-        yellow_filter_btn.config(command = lambda button=yellow_filter_btn: self.on_click_yellow_filter_btn(button))
+        self.yellow_filter_btn = FeatureButton(color_filter_multi_frame, Strings.YELLOW_FILTER_BTN.value, "images\ic_yellow_filter_btn.png")
+        self.yellow_filter_btn.set_frame(
+            FeatureScaleFrame(
+                self.custom_container, 
+                Strings.YELLOW_FILTER_BTN.value, 
+                lambda button=self.yellow_filter_btn: self.update_image_into_selected_and_reset_button(button),
+                lambda event, arg1, arg2: self.yellow_filter_processing(),
+                range = [0,15], 
+                init_value = 0))
+        self.yellow_filter_btn.config(command = lambda button=self.yellow_filter_btn: self.on_click_yellow_filter_btn(button))
         
-        pink_filter_btn = FeatureButton(color_filter_multi_frame, Strings.PINK_FILTER_BTN.value, "images\ic_pink_filter_btn.png")
-        pink_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.PINK_FILTER_BTN.value, lambda button=pink_filter_btn: self.update_image_into_selected_and_reset_button(button)))
-        pink_filter_btn.config(command = lambda button=pink_filter_btn: self.on_click_pink_filter_btn(button))
+        self.pink_filter_btn = FeatureButton(color_filter_multi_frame, Strings.PINK_FILTER_BTN.value, "images\ic_pink_filter_btn.png")
+        self.pink_filter_btn.set_frame(
+            FeatureScaleFrame(
+                self.custom_container, 
+                Strings.PINK_FILTER_BTN.value, 
+                lambda button=self.pink_filter_btn: self.update_image_into_selected_and_reset_button(button),
+                lambda event, arg1, arg2: self.pink_filter_processing(),
+                range = [0,15], 
+                init_value = 0))
+        self.pink_filter_btn.config(command = lambda button=self.pink_filter_btn: self.on_click_pink_filter_btn(button))
 
-        green_filter_btn = FeatureButton(color_filter_multi_frame, Strings.GREEN_FILTER_BTN.value, "images\ic_green_filter_btn.png")
-        green_filter_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.GREEN_FILTER_BTN.value, lambda button=green_filter_btn: self.update_image_into_selected_and_reset_button(button)))
-        green_filter_btn.config(command = lambda button=green_filter_btn: self.on_click_green_filter_btn(button))
+        self.green_filter_btn = FeatureButton(color_filter_multi_frame, Strings.GREEN_FILTER_BTN.value, "images\ic_green_filter_btn.png")
+        self.green_filter_btn.set_frame(
+            FeatureScaleFrame(
+                self.custom_container, 
+                Strings.GREEN_FILTER_BTN.value, 
+                lambda button=self.green_filter_btn: self.update_image_into_selected_and_reset_button(button),
+                lambda event, arg1, arg2: self.green_filter_processing(),
+                range = [0,15], 
+                init_value = 0))
+        self.green_filter_btn.config(command = lambda button=self.green_filter_btn: self.on_click_green_filter_btn(button))
 
-        color_filter_btns.append(red_filter_btn)
-        color_filter_btns.append(blue_filter_btn)
-        color_filter_btns.append(yellow_filter_btn)
-        color_filter_btns.append(pink_filter_btn)
-        color_filter_btns.append(green_filter_btn)
+        color_filter_btns.append(self.red_filter_btn)
+        color_filter_btns.append(self.blue_filter_btn)
+        color_filter_btns.append(self.yellow_filter_btn)
+        color_filter_btns.append(self.pink_filter_btn)
+        color_filter_btns.append(self.green_filter_btn)
 
         color_filter_btn.get_frame().set_btns(color_filter_btns)
 

@@ -38,7 +38,7 @@ def saturation_feature(image, factor):
     Kỹ thuật: Cân bằng histogram toàn cục
 
     Input: 
-    - selected_image: ảnh đang được chọn
+    - image: ảnh đang được chọn
     - factor: chỉ số điều chỉnh bảo hòa.
             + factor = 0: ảnh gốc
             + factor > 0: tăng độ bảo hòa
@@ -75,7 +75,7 @@ def sharpen_feature(image, sigma, strength=1.5, median_kernel_size=3):
     Kỹ thuật: Unsharp Masking
 
     Input: 
-    - selected_image: ảnh đang được chọn
+    - image: ảnh đang được chọn
     - factor: chỉ số điều chỉnh độ sắc nét.
             + factor = 0: ảnh gốc
             + factor > 0: tăng độ sắc nét
@@ -93,3 +93,40 @@ def sharpen_feature(image, sigma, strength=1.5, median_kernel_size=3):
 
     return sharpened
 
+def color_filter(image, s1, s2, s3, factor):
+    '''
+    Lọc màu hình ảnh.
+
+    Nguồn code tham khảo: Duo-Tone - link: https://learnopencv.com/photoshop-filters-in-opencv/
+
+    Input: 
+    - image: ảnh đang được chọn
+    - s1: chỉ số kênh màu 0-blue, 1-green, 2-red
+    - s2: chỉ số kênh màu 0-blue, 1-green, 2-red, 3-none
+    - s3: chỉ số 0-dark, 1-light
+    - factor: chỉ số điều chỉnh sắc độ.
+            + factor = 0: ảnh gốc.
+            + factor > 0: tăng sắc độ.
+
+    Output: Hình ảnh sau khi lọc màu.
+    '''
+    color_filter_factor = 1 + factor/100
+    image_np = np.array(image)
+    image_bgr = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
+
+    for i in range(3):
+        if i in (s1, s2):
+            image_bgr[:, :, i] = exponential_function(image_bgr[:, :, i], color_filter_factor)
+        else:
+            if s3:
+                image_bgr[:, :, i] = exponential_function(image_bgr[:, :, i], 2 - color_filter_factor)
+            else:
+                image_bgr[:, :, i] = 0
+    
+    filtered_img = Image.fromarray(cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB))
+    return filtered_img
+
+def exponential_function(channel, exp):
+
+    table = np.array([min((i**exp), 255) for i in range(256)], dtype=np.uint8) 
+    return cv2.LUT(channel, table)
