@@ -19,6 +19,8 @@ class Sizes(Enum):
     EDIT_FRAME = 480
     FEATURE_FRAME_WIDTH = 300
     FEATURE_FRAME_HEIGHT = 100
+    MAX_IMG = 4000
+    MIN_IMG = 240
 
 class Strings(Enum):
     APP_TITLE = "Photoshop App"
@@ -31,6 +33,8 @@ class Strings(Enum):
     ROTATE_90_BTN = "Xoay 90°"
     ROTATE_MINUS_90_BTN = "Xoay -90°"
     SCALING_BTN = "Kích thước"
+    WIDTH_TEXT = "Chiều ngang"
+    HEIGHT_TEXT = "Chiều dọc"
     BRIGHTNESS_BTN = "Sáng"
     CONTRAST_BTN = "Tương phản"
     SATURATION_BTN = "Bão hòa"
@@ -59,6 +63,7 @@ class Colors(Enum):
     BACKGROUND_V2 = "#525455"
     BACKGROUND_V3 = "#A27B5C"
     TEXT_COLOR = "#000000"
+    TEXT_NOTE = "#A27B5C"
     TEXT_HIGHTLIGHT_COLOR = "#DCD7C9"
     BTN_COLOR = "#525455"
     BTN_HIGHTLIGHT_COLOR = "#A27B5C"

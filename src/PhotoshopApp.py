@@ -3,6 +3,8 @@ from customtkinter import *
 from Constraint import *
 from Components import *
 from ImageProcessor import *
+from tkinter import messagebox
+from PIL import Image, ImageTk
 
 """
 Lớp giao diện chính của phần mềm
@@ -52,6 +54,9 @@ class PhotoshopApp(Tk):
 
     def on_click_resize_btn(self, button: FeatureButton):
         self.show_selected()
+        w, h = self.selected_img.size
+        self.w_img.set(int(w))
+        self.h_img.set(int(h))
         button.select_button()
 
     def on_click_brightness_btn(self, button: FeatureButton):
@@ -152,24 +157,23 @@ class PhotoshopApp(Tk):
         if file_path:
             self.selected_img_path = file_path
             image = get_image(self.selected_img_path)
-            self.set_selected_img(load_image(self.original_container, image, Sizes.ORIGINAL_FRAME.value))
+            self.set_selected_img(load_image(self.original_container, image, Sizes.ORIGINAL_FRAME.value, Sizes.ORIGINAL_FRAME.value))
             self.load_image_into_edit(image)
 
     def load_image_into_edit(self, image):
         if image is not None:
-            self.temp_img = load_image(self.edit_container, image, Sizes.EDIT_FRAME.value)
+            self.temp_img = load_image(self.edit_container, image, Sizes.EDIT_FRAME.value, Sizes.EDIT_FRAME.value)
 
     def update_image_into_selected(self):
         if self.temp_img is not None and self.temp_img != self.selected_img:
             self.edit_step.append(self.selected_img)
-            self.set_selected_img(load_image(self.original_container, self.temp_img, Sizes.ORIGINAL_FRAME.value))
+            self.set_selected_img(load_image(self.original_container, self.temp_img, Sizes.ORIGINAL_FRAME.value, Sizes.ORIGINAL_FRAME.value))
             self.load_image_into_edit(self.temp_img)
 
     def update_image_into_selected_and_reset_button(self, button):
         self.update_image_into_selected()
         button.frame.draw()
-            
-            
+                        
     def export_image(self):
         if self.selected_img:
             file_path = filedialog.asksaveasfilename(defaultextension=".png")
@@ -188,10 +192,11 @@ class PhotoshopApp(Tk):
         self.edit_step = []
         self.edit_container.delete("all")
         self.original_container.delete("all")
+        self.inner_frame.destroy()
         self.selected_img_changed()
 
     def show_selected(self):
-        self.set_selected_img(load_image(self.original_container, self.selected_img, Sizes.ORIGINAL_FRAME.value))
+        self.set_selected_img(load_image(self.original_container, self.selected_img, Sizes.ORIGINAL_FRAME.value, Sizes.ORIGINAL_FRAME.value))
         self.load_image_into_edit(self.selected_img)
         self.temp_img = self.selected_img
 
@@ -202,13 +207,34 @@ class PhotoshopApp(Tk):
 
     def selected_img_changed(self):
         if self.selected_img != None:
-            self.inner_frame.pack()
-            self.custom_container.pack()
-            self.choice_frame.pack()
+            self.inner_frame.draw()
         else:
-            self.inner_frame.pack_forget()
-            self.custom_container.pack_forget()
-            self.choice_frame.pack_forget()
+            self.inner_frame.destroy()
+
+    def resize_processing(self):
+        self.width_status.grid_forget()
+        self.height_status.grid_forget()
+        max = Sizes.MAX_IMG.value
+        min = Sizes.MIN_IMG.value
+
+        try:
+            temp_w = int(self.w_img.get())
+            temp_h = int(self.h_img.get())
+
+            if max >= temp_w >= min and max >= temp_h >= min:
+                self.temp_img = self.selected_img.resize((temp_w, temp_h), Image.BICUBIC)
+                
+                self.width_status.grid(row=2, column=2, padx=5, pady=5)
+                self.height_status.grid(row=3, column=2, padx=5, pady=5)
+                return
+            else:
+                messagebox.showwarning("Cảnh báo", f"Kích thước không phù hợp. Vui lòng nhập lại với kích thước trong khoảng {min} đến {max}")
+        except ValueError:
+            pass
+             
+        w, h = self.selected_img.size
+        self.w_img.set(str(w))
+        self.h_img.set(str(h))
 
     # Draw View
 
@@ -345,8 +371,44 @@ class PhotoshopApp(Tk):
         rotation_btn.get_frame().set_btns(rotation_btns)
 
         resize_btn = FeatureButton(format_multi_frame, Strings.SCALING_BTN.value, "images\icon_resize_btn.png")
+        resize_edit_frame = MultilFeature(self.custom_container)
+        resize_btn.set_frame(resize_edit_frame)
         resize_btn.config(command = lambda button=resize_btn: self.on_click_resize_btn(button))
+
+        self.w_img = StringVar()
+        self.h_img = StringVar()
+        self.w_img.set(str(0))
+        self.h_img.set(str(0))
+
+        resize_edit_frame_label = Label(resize_edit_frame, text="Nhấn Enter để thiết lập giá trị biến đổi!", background = Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
+        resize_edit_frame_label.grid(row=0, column=0, columnspan=2, padx=5, pady=5)
+
+        resize_edit_frame_note = Label(resize_edit_frame, text= f"Lưu ý: Nhập giá trị trong khoảng {Sizes.MIN_IMG.value} đến {Sizes.MAX_IMG.value}", background = Colors.BACKGROUND_V2.value, fg=Colors.TEXT_NOTE.value)
+        resize_edit_frame_note.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
         
+        width_label = Label(resize_edit_frame, text=Strings.WIDTH_TEXT.value, background = Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
+        width_label.grid(row=2, column=0, padx=5, pady=5)
+        width_input = CTkEntry(resize_edit_frame, textvariable=self.w_img)
+        width_input.grid(row=2, column=1, padx=5, pady=5)
+
+        status_image = ImageTk.PhotoImage(Image.open("images\ic_check.png").resize((20, 20), Image.BICUBIC))
+
+        self.width_status = Label(resize_edit_frame, image=status_image, background = Colors.BACKGROUND_V2.value)
+        self.width_status.photo = status_image
+
+        height_label = Label(resize_edit_frame, text=Strings.HEIGHT_TEXT.value, background = Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
+        height_label.grid(row=3, column=0, padx=5, pady=5)
+        height_input = CTkEntry(resize_edit_frame, textvariable=self.h_img)
+        height_input.grid(row=3, column=1, padx=5, pady=5)
+
+        self.height_status = Label(resize_edit_frame, image=status_image, background = Colors.BACKGROUND_V2.value)
+        self.height_status.photo = status_image
+
+        width_input.bind("<Return>", lambda event: self.resize_processing())
+        height_input.bind("<Return>", lambda event: self.resize_processing())
+
+        resize_btn.config(command = lambda button=resize_btn: self.on_click_resize_btn(button))
+
         format_btn_update = FeatureButton(format_multi_frame, Strings.UPDATE_BTN.value, "images\ic_update_btn.png")
         format_btn_update.config(command = lambda: self.update_image_into_selected())
 
@@ -397,7 +459,6 @@ class PhotoshopApp(Tk):
                 init_value = 0))
         self.saturation_btn.config(command = lambda button=self.saturation_btn: self.on_click_saturation_btn(button))
         
-
         customize_btns.append(self.brightness_btn)
         customize_btns.append(self.contrast_btn)
         customize_btns.append(self.saturation_btn)
