@@ -51,7 +51,7 @@ class MultilFeature(CTkFrame):
             self.pack_forget()
 
 class FeatureScaleFrame(CTkFrame):
-    def __init__(self, parent: Frame, variable_name, cmd_update = None, cmd_process = None, arrange = [0,100], init_value = 0, w = Sizes.FEATURE_FRAME_WIDTH.value , h = Sizes.FEATURE_FRAME_HEIGHT.value, background = Colors.BACKGROUND_V3.value):
+    def __init__(self, parent: Frame, variable_name, cmd_update = None, cmd_process = None, range = [0,100], init_value = 0, w = Sizes.FEATURE_FRAME_WIDTH.value , h = Sizes.FEATURE_FRAME_HEIGHT.value, background = Colors.BACKGROUND_V3.value):
         super().__init__(master=parent)
         self.pack_propagate(FALSE)
         self.parent = parent
@@ -72,8 +72,8 @@ class FeatureScaleFrame(CTkFrame):
             self.variable_value.trace_add('write', callback=cmd_process)
         
         self.label_value = Label(self.label_frame, background=self.background, textvariable=self.variable_value)
-        step = arrange[1] - arrange[0]
-        self.scale = CTkSlider(self, from_=arrange[0], to=arrange[1], number_of_steps=step, command=self.set_value)
+        step = range[1] - range[0]
+        self.scale = CTkSlider(self, from_=range[0], to=range[1], number_of_steps=step, command=self.set_value)
 
         self.update_button = CTkButton(self, width=100, height=20, text=Strings.UPDATE_BTN.value)
 
