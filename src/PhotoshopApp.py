@@ -246,7 +246,7 @@ class PhotoshopApp(Tk):
 
             if max >= temp_w >= min and max >= temp_h >= min:
                 self.temp_img = self.selected_img.resize((temp_w, temp_h), Image.BICUBIC)
-                
+                self.load_image_into_edit(self.temp_img)
                 self.width_status.grid(row=2, column=2, padx=5, pady=5)
                 self.height_status.grid(row=3, column=2, padx=5, pady=5)
                 return

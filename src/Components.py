@@ -151,18 +151,20 @@ class FeatureButton(Button):
 
     def select_button(self):
         temp_btn = self.container.get_selected_btn()
+
         if self.container is not None:
-            if self != temp_btn:
-                self.container.set_selected_btn(self)
-            else:
+            if self is temp_btn:
                 self.container.set_selected_btn(None)
+            else:
+                self.container.set_selected_btn(self)
 
             self.update_selected_btn_color()
     
     def update_selected_btn_color(self):
         temp_btn = self.container.get_selected_btn()
+
         for btn in self.container.btns:
-            if btn is temp_btn:
+            if btn == temp_btn:
                 btn.config(bg = Colors.BTN_HIGHTLIGHT_COLOR.value)
                 btn.show_frame()
             else:
