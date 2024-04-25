@@ -13,6 +13,10 @@ def get_image(image_path):
     image = Image.open(image_path)
     return image
 
+def rotate_image(image, degrees):
+    rotated_image = image.rotate(degrees, expand=True)
+    return rotated_image
+
 def resize_image(image: Image,  w, h):
     aspect_ratio = image.width / image.height
     new_width = w if aspect_ratio >= 1 else int(w * aspect_ratio)

@@ -56,6 +56,10 @@ class Strings(Enum):
     YELLOW_FILTER_BTN = "Vàng"
     PINK_FILTER_BTN = "Hồng"
     GREEN_FILTER_BTN = "Xanh lá"
+    PADDING_LEFT = "Cách trái"
+    PADDING_RIGHT = "Cách phải"
+    PADDING_TOP = "Cách trên"
+    PADDING_BOTTOM = "Cách dưới"
 
 class Colors(Enum):
     INIT_COLOR = "#000000"

@@ -39,16 +39,55 @@ class PhotoshopApp(Tk):
     def on_click_cut_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
+    
+    def cut_processing(self, var = None, index = None, mode = None):
+        max_size = 100
+
+        try:
+            left = int(self.left_img.get())
+            top = int(self.top_img.get())
+            right = int(self.right_img.get())
+            bottom = int(self.bottom_img.get())
+            if max_size >= left >= 0 and max_size >= top >= 0 and max_size >= right >= left and max_size >= bottom >= top:
+                self.temp_img = self.selected_img.crop((left, top, right, bottom))
+                self.load_image_into_edit(self.temp_img)
+
+                return
+            else:
+                messagebox.showwarning("Cảnh báo", f"Giá trị không hợp lệ. Vui lòng nhập lại với giá trị trong khoảng từ 0 đến {max_size}")
+        except ValueError:
+            pass
+
+        # Nếu có lỗi xảy ra hoặc người dùng nhập giá trị không hợp lệ, giữ nguyên hình ảnh ban đầu
+        # width, height = self.selected_img.size
+        # self.left_img.set(str(0))
+        # self.top_img.set(str(0))
+        # self.right_img.set(str(width))
+        # self.bottom_img.set(str(height))
 
     def on_click_rotate_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
 
+    def rotate_image(self, angle):
+        if self.selected_img:
+            rotated_image = self.selected_img.rotate(angle, expand=True)
+            self.update_image_into_selected()
+            self.temp_img = rotated_image
+            self.load_image_into_edit(rotated_image)
+
     def on_click_rotate_minus_90_button(self, button: FeatureButton):
         self.show_selected()
+        self.rotate_image(-90)
+        button.select_button()
+        self.update_image_into_selected_and_reset_button(button)
 
     def on_click_rotate_90_button(self, button: FeatureButton):
         self.show_selected()
+        self.rotate_image(90)
+        button.select_button()
+        self.update_image_into_selected_and_reset_button(button)
+
 
     def on_click_resize_btn(self, button: FeatureButton):
         self.show_selected()
@@ -451,7 +490,45 @@ class PhotoshopApp(Tk):
 
         format_btns = []
 
+        self.left_img = StringVar()
+        self.right_img = StringVar()
+        self.top_img = StringVar()
+        self.bottom_img = StringVar()
+        self.left_img.set(str(0))
+        self.right_img.set(str(0))
+        self.top_img.set(str(0))
+        self.bottom_img.set(str(0))
+
         cut_btn = FeatureButton(format_multi_frame, Strings.CUT_BTN.value, "images\ic_cut_btn.png")
+        cut_edit_frame = MultilFeature(self.custom_container)
+        cut_btn.set_frame(cut_edit_frame)
+        cut_btn.config(command = lambda button=cut_btn: self.on_click_cut_btn(button))
+
+        padding_left = Label(cut_edit_frame, text=Strings.PADDING_LEFT.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
+        padding_left.grid(row=0, column=0, padx=5, pady=5)
+        padding_left_input = CTkEntry(cut_edit_frame, textvariable=self.left_img)
+        padding_left_input.grid(row=0, column=1, padx=5, pady=5)
+
+        padding_top = Label(cut_edit_frame, text=Strings.PADDING_TOP.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
+        padding_top.grid(row=1, column=0, padx=5, pady=5)
+        padding_top_input = CTkEntry(cut_edit_frame, textvariable=self.top_img)
+        padding_top_input.grid(row=1, column=1, padx=5, pady=5)
+
+        padding_right = Label(cut_edit_frame, text=Strings.PADDING_RIGHT.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
+        padding_right.grid(row=2, column=0, padx=5, pady=5)
+        padding_right_input = CTkEntry(cut_edit_frame, textvariable=self.right_img)
+        padding_right_input.grid(row=2, column=1, padx=5, pady=5)
+
+        padding_bottom = Label(cut_edit_frame, text=Strings.PADDING_BOTTOM.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
+        padding_bottom.grid(row=3, column=0, padx=5, pady=5)
+        padding_bottom_input = CTkEntry(cut_edit_frame, textvariable=self.bottom_img)
+        padding_bottom_input.grid(row=3, column=1, padx=5, pady=5)
+
+        padding_bottom_input.bind("<Return>", lambda event: self.cut_processing())
+        padding_top_input.bind("<Return>", lambda event: self.cut_processing())
+        padding_right_input.bind("<Return>", lambda event: self.cut_processing())
+        padding_left_input.bind("<Return>", lambda event: self.cut_processing())
+
         cut_btn.config(command = lambda button=cut_btn: self.on_click_cut_btn(button))
         
         rotation_btn = FeatureButton(format_multi_frame, Strings.ROTATION_BTN.value, "images\icon_rotate_btn.png")
