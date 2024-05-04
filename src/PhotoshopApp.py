@@ -41,52 +41,37 @@ class PhotoshopApp(Tk):
         button.select_button()
     
     def cut_processing(self, var = None, index = None, mode = None):
-        max_size = 100
-
+        max_size = 500
         try:
-            left = int(self.left_img.get())
-            top = int(self.top_img.get())
-            right = int(self.right_img.get())
-            bottom = int(self.bottom_img.get())
+            left = 0
+            top = 0
+            right = 100
+            bottom = 100
             if max_size >= left >= 0 and max_size >= top >= 0 and max_size >= right >= left and max_size >= bottom >= top:
                 self.temp_img = self.selected_img.crop((left, top, right, bottom))
                 self.load_image_into_edit(self.temp_img)
-
                 return
             else:
                 messagebox.showwarning("Cảnh báo", f"Giá trị không hợp lệ. Vui lòng nhập lại với giá trị trong khoảng từ 0 đến {max_size}")
         except ValueError:
             pass
 
-        # Nếu có lỗi xảy ra hoặc người dùng nhập giá trị không hợp lệ, giữ nguyên hình ảnh ban đầu
-        # width, height = self.selected_img.size
-        # self.left_img.set(str(0))
-        # self.top_img.set(str(0))
-        # self.right_img.set(str(width))
-        # self.bottom_img.set(str(height))
-
     def on_click_rotate_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
 
-    def rotate_image(self, angle):
-        if self.selected_img:
-            rotated_image = self.selected_img.rotate(angle, expand=True)
-            self.update_image_into_selected()
-            self.temp_img = rotated_image
-            self.load_image_into_edit(rotated_image)
+    def on_click_rotate_90_button(self, button: FeatureButton):
+        if self.temp_img:
+            result = rotate_image(self.temp_img, 90)
+            self.temp_img = result
+            self.load_image_into_edit(result)
 
     def on_click_rotate_minus_90_button(self, button: FeatureButton):
-        self.show_selected()
-        self.rotate_image(-90)
-        button.select_button()
-        self.update_image_into_selected_and_reset_button(button)
 
-    def on_click_rotate_90_button(self, button: FeatureButton):
-        self.show_selected()
-        self.rotate_image(90)
-        button.select_button()
-        self.update_image_into_selected_and_reset_button(button)
+        if self.temp_img:
+            result = rotate_image(self.temp_img, -90)
+            self.temp_img = result
+            self.load_image_into_edit(result)
 
 
     def on_click_resize_btn(self, button: FeatureButton):
@@ -416,7 +401,7 @@ class PhotoshopApp(Tk):
         self.start_frame.pack_propagate(False)
 
         #Background
-        load_gif_into_frame(self.start_frame, "gifs\_background.gif", Sizes.WIDTH_RIGHT.value)
+        # load_gif_into_frame(self.start_frame, "gifs\_background.gif", Sizes.WIDTH_RIGHT.value)
 
 
         infor_frame = CTkFrame(self.start_frame, bg_color=Colors.BACKGROUND_V2.value)
@@ -503,6 +488,13 @@ class PhotoshopApp(Tk):
         cut_edit_frame = MultilFeature(self.custom_container)
         cut_btn.set_frame(cut_edit_frame)
         cut_btn.config(command = lambda button=cut_btn: self.on_click_cut_btn(button))
+
+        # Create Canvas to display image
+        self.canvas1 = Canvas(cut_edit_frame, width=400, height=400)
+        self.canvas1.pack()
+        self.rect = self.canvas.create_rectangle(50, 50, 150, 150, outline='red', width=2, dash=(4, 4))
+        
+
 
         padding_left = Label(cut_edit_frame, text=Strings.PADDING_LEFT.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
         padding_left.grid(row=0, column=0, padx=5, pady=5)

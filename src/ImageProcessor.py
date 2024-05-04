@@ -122,6 +122,12 @@ def saturation_feature(image, factor):
 
     return saturated_image
 
+<<<<<<< HEAD
+=======
+def rotate_image(image, angle):
+    rotated_image = image.rotate(angle, expand=True)
+    return rotated_image
+>>>>>>> 9051290 (v1)
 
 def brightness_feature(image, factor):
     enhancer = ImageEnhance.Brightness(image)
