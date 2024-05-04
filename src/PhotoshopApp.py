@@ -39,7 +39,7 @@ class PhotoshopApp(Tk):
     def on_click_cut_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
-    
+
     def cut_processing(self, var = None, index = None, mode = None):
         max_size = 500
         try:
@@ -485,43 +485,22 @@ class PhotoshopApp(Tk):
         self.bottom_img.set(str(0))
 
         cut_btn = FeatureButton(format_multi_frame, Strings.CUT_BTN.value, "images\ic_cut_btn.png")
-        cut_edit_frame = MultilFeature(self.custom_container)
+        cut_edit_frame = MultilFeature(self.edit_container)
         cut_btn.set_frame(cut_edit_frame)
-        cut_btn.config(command = lambda button=cut_btn: self.on_click_cut_btn(button))
-
-        # Create Canvas to display image
-        self.canvas1 = Canvas(cut_edit_frame, width=400, height=400)
-        self.canvas1.pack()
-        self.rect = self.canvas.create_rectangle(50, 50, 150, 150, outline='red', width=2, dash=(4, 4))
+        
+    
         
 
+        canvas = Canvas(cut_edit_frame, width=350, height=310)
+        canvas.pack()
+        drag_rect = DragRect(canvas, 0, 0, 350, 310, fill="")
 
-        padding_left = Label(cut_edit_frame, text=Strings.PADDING_LEFT.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
-        padding_left.grid(row=0, column=0, padx=5, pady=5)
-        padding_left_input = CTkEntry(cut_edit_frame, textvariable=self.left_img)
-        padding_left_input.grid(row=0, column=1, padx=5, pady=5)
-
-        padding_top = Label(cut_edit_frame, text=Strings.PADDING_TOP.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
-        padding_top.grid(row=1, column=0, padx=5, pady=5)
-        padding_top_input = CTkEntry(cut_edit_frame, textvariable=self.top_img)
-        padding_top_input.grid(row=1, column=1, padx=5, pady=5)
-
-        padding_right = Label(cut_edit_frame, text=Strings.PADDING_RIGHT.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
-        padding_right.grid(row=2, column=0, padx=5, pady=5)
-        padding_right_input = CTkEntry(cut_edit_frame, textvariable=self.right_img)
-        padding_right_input.grid(row=2, column=1, padx=5, pady=5)
-
-        padding_bottom = Label(cut_edit_frame, text=Strings.PADDING_BOTTOM.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
-        padding_bottom.grid(row=3, column=0, padx=5, pady=5)
-        padding_bottom_input = CTkEntry(cut_edit_frame, textvariable=self.bottom_img)
-        padding_bottom_input.grid(row=3, column=1, padx=5, pady=5)
-
-        padding_bottom_input.bind("<Return>", lambda event: self.cut_processing())
-        padding_top_input.bind("<Return>", lambda event: self.cut_processing())
-        padding_right_input.bind("<Return>", lambda event: self.cut_processing())
-        padding_left_input.bind("<Return>", lambda event: self.cut_processing())
-
+        
         cut_btn.config(command = lambda button=cut_btn: self.on_click_cut_btn(button))
+
+        # padding_left = Label(cut_edit_frame, text=Strings.PADDING_LEFT.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
+
+
         
         rotation_btn = FeatureButton(format_multi_frame, Strings.ROTATION_BTN.value, "images\icon_rotate_btn.png")
         rotation_multi_frame = MultilFeature(self.custom_container)

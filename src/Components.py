@@ -171,3 +171,22 @@ class FeatureButton(Button):
                 btn.config(bg = Colors.BTN_COLOR.value)
                 btn.hide_frame()
 
+class DragRect:
+    def __init__(self, canvas, x, y, width, height, **kwargs):
+        self.canvas = canvas
+        self.rect = canvas.create_rectangle(x, y, x + width, y + height, outline="red", stipple="gray25", **kwargs)
+        self.start_x = 0
+        self.start_y = 0
+        self.canvas.tag_bind(self.rect, '<ButtonPress-1>', self.on_press)
+        self.canvas.tag_bind(self.rect, '<B1-Motion>', self.on_drag)
+        
+    def on_press(self, event):
+        self.start_x = event.x
+        self.start_y = event.y
+        
+    def on_drag(self, event):
+        dx = event.x - self.start_x
+        dy = event.y - self.start_y
+        self.canvas.move(self.rect, dx, dy)
+        self.start_x = event.x
+        self.start_y = event.y
