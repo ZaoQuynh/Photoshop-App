@@ -122,12 +122,9 @@ def saturation_feature(image, factor):
 
     return saturated_image
 
-<<<<<<< HEAD
-=======
 def rotate_image(image, angle):
     rotated_image = image.rotate(angle, expand=True)
     return rotated_image
->>>>>>> 9051290 (v1)
 
 def brightness_feature(image, factor):
     '''
@@ -185,7 +182,7 @@ def contrast_feature(image, factor):
 
     Output: hình ảnh sau khi xử lý độ tương phản.
     '''
-    factor+=1
+    factor = 1 +factor/50
     contrast_factor = factor
     img_arr = np.array(image)
 
