@@ -146,7 +146,7 @@ def sharpen_feature(image, sigma, strength=1.5, median_kernel_size=3):
     Output: hình ảnh sau khi xử lý tăng độ sắc nét.
     '''
 
-    sharpen_factor = 1 + sigma/10
+    sharpen_factor = sigma/10
     image_np = np.array(image)
     image_bgr = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
     blurred = cv2.GaussianBlur(image_bgr, (0, 0), sharpen_factor)
