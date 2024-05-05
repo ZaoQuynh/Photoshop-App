@@ -4,7 +4,7 @@ from Constraint import *
 from Components import *
 from ImageProcessor import *
 from tkinter import messagebox
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw
 import webbrowser
 
 class PhotoshopApp(Tk):
@@ -19,6 +19,8 @@ class PhotoshopApp(Tk):
         self.selected_img_path = None
         self.edit_step = []
         self.selected_button:Button = None
+        self.prevPoint = [0,0]
+        self.currentPoint = [0,0]
 
         self.main_view()
 
@@ -113,9 +115,13 @@ class PhotoshopApp(Tk):
         result = saturation_feature(self.selected_img, self.saturation_btn.frame.get_value())
         self.load_image_into_edit(result)
 
-    def on_click_blur__btn(self, button: FeatureButton):
+    def on_click_blur_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
+        
+    def blur_processing(self, var = None, index= None, mode= None):
+        result = blur_feature(self.selected_img, self.blur_btn.frame.get_value())
+        self.load_image_into_edit(result)
 
     def on_click_sharpen_btn(self, button: FeatureButton):
         self.show_selected()
@@ -128,6 +134,10 @@ class PhotoshopApp(Tk):
     def on_click_smoothing_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
+    
+    def smoothing_processing(self, var = None, index= None, mode= None):
+        result = smoothing_feature(self.selected_img, self.smoothing_btn.frame.get_value())
+        self.load_image_into_edit(result)
 
     def on_click_draw_btn(self, button: FeatureButton):
         self.show_selected()
@@ -181,23 +191,48 @@ class PhotoshopApp(Tk):
         self.show_selected()
         button.select_button()
 
+    def bind_mouse_events(self):
+        self.edit_container.bind("<B1-Motion>", self.on_mouse_drag)
+        self.edit_container.bind("<ButtonRelease-1>", self.on_mouse_drag)
+    
     def on_click_red_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
+        self.chooseColor = "red"
+        self.bind_mouse_events()
 
     def on_click_blue_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
-
+        self.chooseColor = "blue"
+        self.bind_mouse_events()
+        
     def on_click_yellow_btn(self, button: FeatureButton):
+        self.cp_image = self.selected_img.copy()
+        self.draw = ImageDraw.Draw(self.cp_image)
         self.show_selected()
         button.select_button()
+        self.chooseColor = "yellow"
+        self.bind_mouse_events()
 
     def on_click_text_btn(self, button: FeatureButton):
         self.show_selected()
         button.select_button()
-
-    # Basic button
+        
+    def on_mouse_drag(self, event):
+        x = event.x
+        y = event.y
+        self.currentPoint = [x, y]
+        if self.prevPoint != [0, 0]:
+            self.edit_container.create_line(self.prevPoint[0], self.prevPoint[1], self.currentPoint[0], self.currentPoint[1], fill=self.chooseColor)
+            self.draw.line([self.prevPoint[0], self.prevPoint[1], self.currentPoint[0], self.currentPoint[1]], fill=self.chooseColor)       
+        self.prevPoint = self.currentPoint     
+        if event.type == "5":
+            self.prevPoint = [0, 0]
+            self.update_image_into_selected_after_paint()
+            self.selected_button = None
+            
+        return self.cp_image
 
     def select_image(self):
         self.restart()
@@ -253,10 +288,20 @@ class PhotoshopApp(Tk):
             self.edit_step.append(self.selected_img)
             self.set_selected_img(load_image(self.original_container, self.temp_img, Sizes.ORIGINAL_FRAME.value, Sizes.ORIGINAL_FRAME.value))
             self.load_image_into_edit(self.temp_img)
+    
+    def update_image_into_selected_after_paint(self):
+        if self.cp_image is not None and self.cp_image != self.selected_img:
+            self.edit_step.append(self.selected_img)
+            self.set_selected_img(load_image(self.original_container, self.cp_image, Sizes.ORIGINAL_FRAME.value, Sizes.ORIGINAL_FRAME.value))
+            self.load_image_into_edit(self.cp_image)
 
     def update_image_into_selected_and_reset_button(self, button):
         self.update_image_into_selected()
         button.frame.draw()
+        
+    def update_image_into_selected_after_paint_and_reset_button(self, button):
+        self.update_image_into_selected_after_paint()
+        button = None
                         
     def export_image(self):
         if self.selected_img:
@@ -691,9 +736,16 @@ class PhotoshopApp(Tk):
 
         customize_btn.get_frame().set_btns(customize_btns)
 
-        blur_btn = FeatureButton(parent, Strings.BLUR_BTN.value, "images\ic_blur_btn.png")
-        blur_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.BLUR_BTN.value, lambda button=blur_btn: self.update_image_into_selected_and_reset_button(button)))
-        blur_btn.config(command = lambda button=blur_btn: self.on_click_blur__btn(button))
+        self.blur_btn = FeatureButton(parent, Strings.BLUR_BTN.value, "images\ic_blur_btn.png")
+        self.blur_btn.set_frame(
+            FeatureScaleFrame(
+                self.custom_container,
+                Strings.BLUR_BTN.value,
+                lambda button=self.blur_btn: self.update_image_into_selected_and_reset_button(button),
+                lambda event, arg1, arg2: self.blur_processing(),
+                range = [0, 100],
+                init_value = 0))
+        self.blur_btn.config(command = lambda button=self.blur_btn: self.on_click_blur_btn(button))
 
         self.sharpen_btn = FeatureButton(parent, Strings.SHARPEN_BTN.value, "images\ic_sharpen_btn.png")
         self.sharpen_btn.set_frame(
@@ -706,9 +758,16 @@ class PhotoshopApp(Tk):
                 init_value = 0))
         self.sharpen_btn.config(command = lambda button=self.sharpen_btn: self.on_click_sharpen_btn(button))
 
-        smoothing_btn = FeatureButton(parent, Strings.SMOOTHING_BTN.value, "images\ic_smoothing_btn.png")
-        smoothing_btn.set_frame(FeatureScaleFrame(self.custom_container, Strings.SMOOTHING_BTN.value, lambda button=smoothing_btn: self.update_image_into_selected_and_reset_button(button)))
-        smoothing_btn.config(command = lambda button=smoothing_btn: self.on_click_smoothing_btn(button))
+        self.smoothing_btn = FeatureButton(parent, Strings.SMOOTHING_BTN.value, "images\ic_smoothing_btn.png")
+        self.smoothing_btn.set_frame(
+            FeatureScaleFrame(
+                self.custom_container, 
+                Strings.SMOOTHING_BTN.value, 
+                lambda button=self.smoothing_btn: self.update_image_into_selected_and_reset_button(button),
+                lambda event, arg1, arg2: self.smoothing_processing(),
+                range = [0, 100],
+                init_value = 0))
+        self.smoothing_btn.config(command = lambda button=self.smoothing_btn: self.on_click_smoothing_btn(button))
 
         color_filter_btn = FeatureButton(parent, Strings.COLOR_FILTER_BTN.value, "images\ic_color_filter_btn.png")
         color_filter_multi_frame = MultilFeature(self.choice_frame)
@@ -793,40 +852,40 @@ class PhotoshopApp(Tk):
         pen_btn.config(command = lambda button=pen_btn: self.on_click_pen_btn(button))
 
         pen_btns = []
+        
+        self.red_btn = FeatureButton(pen_multi_frame, Strings.RED_BTN.value, "images\ic_red_btn.png")
+        self.red_btn.config(command = lambda button=self.red_btn: self.on_click_red_btn(button))
 
-        red_btn = FeatureButton(pen_multi_frame, Strings.RED_BTN.value, "images\ic_red_btn.png")
-        red_btn.config(command = lambda button=red_btn: self.on_click_red_btn(button))
+        self.blue_btn = FeatureButton(pen_multi_frame, Strings.BLUE_BTN.value, "images\ic_blue_btn.png")
+        self.blue_btn.config(command = lambda button=self.blue_btn: self.on_click_blue_btn(button))
 
-        blue_btn = FeatureButton(pen_multi_frame, Strings.BLUE_BTN.value, "images\ic_blue_btn.png")
-        blue_btn.config(command = lambda button=blue_btn: self.on_click_blue_btn(button))
+        self.yellow_btn = FeatureButton(pen_multi_frame, Strings.YELLOW_BTN.value, "images\ic_yellow_btn.png")
+        self.yellow_btn.config(command = lambda button=self.yellow_btn: self.on_click_yellow_btn(button))
 
-        yellow_btn = FeatureButton(pen_multi_frame, Strings.YELLOW_BTN.value, "images\ic_yellow_btn.png")
-        yellow_btn.config(command = lambda button=yellow_btn: self.on_click_yellow_btn(button))
-
-        pen_btns.append(red_btn)
-        pen_btns.append(blue_btn)
-        pen_btns.append(yellow_btn)
+        pen_btns.append(self.red_btn)
+        pen_btns.append(self.blue_btn)
+        pen_btns.append(self.yellow_btn)
 
         pen_btn.get_frame().set_btns(pen_btns)
 
         text_btn = FeatureButton(draw_multi_frame, Strings.TEXT_BTN.value, "images\ic_text_btn.png")
         text_btn.config(command = lambda button=text_btn: self.on_click_text_btn(button))
 
-        draw_btn_update = FeatureButton(draw_multi_frame, Strings.UPDATE_BTN.value, "images\ic_update_btn.png")
-        draw_btn_update.config(command = lambda: self.update_image_into_selected())
+        self.draw_btn_update = FeatureButton(draw_multi_frame, Strings.UPDATE_BTN.value, "images\ic_update_btn.png")
+        self.draw_btn_update.config(command = lambda button=self.draw_btn_update: self.update_image_into_selected_after_paint_and_reset_button(button))
 
         draw_btns.append(pen_btn)
         draw_btns.append(text_btn)
-        draw_btns.append(draw_btn_update)
+        draw_btns.append(self.draw_btn_update)
 
         draw_btn.get_frame().set_btns(draw_btns)
 
         feature_btns = []
         feature_btns.append(format_btn)
         feature_btns.append(customize_btn)
-        feature_btns.append(blur_btn)
+        feature_btns.append(self.blur_btn)
         feature_btns.append(self.sharpen_btn)
-        feature_btns.append(smoothing_btn)
+        feature_btns.append(self.smoothing_btn)
         feature_btns.append(color_filter_btn)
         feature_btns.append(draw_btn)
 
