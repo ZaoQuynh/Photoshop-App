@@ -108,11 +108,9 @@ def saturation_feature(image, factor):
 
     factor_saturate = factor/50
     
-    # Define piecewise-linear transformation function
     def piecewise_linear(x):
         return np.piecewise(x, [x < 128, x >= 128], [lambda x: x * (1 + factor_saturate), lambda x: 255 - (255 - x) * (1 - factor_saturate)])
 
-    # Apply transformation to the saturation channel
     img_cvt[:,:,1] = piecewise_linear(img_cvt[:,:,1])
 
     saturated_array = cv2.cvtColor(img_cvt, cv2.COLOR_HSV2BGR)
