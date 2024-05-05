@@ -40,19 +40,16 @@ class PhotoshopApp(Tk):
         self.show_selected_rectangular()
         button.select_button()
 
-    def cut_processing(self, start_x, start_y, rect_width, rect_height, image_width, image_height):
-        max_size = 500
-        try:
-            # Tính toán các giá trị cần thiết để cắt ảnh
-            # left = start_x
-            # right = min(start_x + rect_width, image_width)
-            # top = start_y
-            # bottom = min(start_y + rect_height, image_height)   
-            left = 0
-            top = 0
-            right = 10
-            bottom = 10
 
+    def cut_processing(self, left, top,right , bottom):
+        max_size = 1000000
+        print(left, top,right , bottom)
+        # top = top + 310
+        left = 0
+        top = 0
+        right = 1200
+        bottom = 670
+        try: 
             # Kiểm tra xem tọa độ và kích thước của hình chữ nhật có hợp lệ không
             if max_size >= left >= 0 and max_size >= top >= 0 and max_size >= right >= left and max_size >= bottom >= top:
                 # Cắt ảnh theo hình chữ nhật đã chọn
@@ -63,6 +60,7 @@ class PhotoshopApp(Tk):
                 # Hiển thị cảnh báo nếu tọa độ hoặc kích thước không hợp lệ
                 messagebox.showwarning("Cảnh báo", f"Giá trị không hợp lệ. Vui lòng nhập lại với giá trị trong khoảng từ 0 đến {max_size}")
         except ValueError:
+            messagebox.showwarning("Cảnh báo", f"Lỗi")
             pass
 
     def on_click_rotate_btn(self, button: FeatureButton):
@@ -214,19 +212,14 @@ class PhotoshopApp(Tk):
     def load_image_into_edit(self, image):
         if image is not None:
             self.temp_img = load_image(self.edit_container, image, Sizes.EDIT_FRAME.value, Sizes.EDIT_FRAME.value)
+
     def load_image_into_edit_rectangular(self, image):
         if image is not None:
             self.temp_img = load_image(self.edit_container, image, Sizes.EDIT_FRAME.value, Sizes.EDIT_FRAME.value)
-            # rectangular =  DragRect(self.edit_container, 10, 10, 300, 200, fill="")
-            # new_coordinates = rectangular.get_coordinates()
-            # print("New coordinates:", list(new_coordinates))
             def handle_new_coordinates(coordinates):
                 print("New coordinates:", coordinates)
-                
-                self.cut_processing(10, 10, 300, 200, 480, 480)
-        # Tạo đối tượng DragRect và truyền hàm gọi lại vào đó
-            rectangular = DragRect(self.edit_container, 160, 160, 300, 200, fill="", callback=handle_new_coordinates)
-        # In ra tọa độ mới khi khởi tạo
+                self.cut_processing(coordinates[0], coordinates[1], coordinates[2], coordinates[3])
+            rectangular = DragRect(self.edit_container, 0, 110, 480, 260, fill="", callback=handle_new_coordinates)
             initial_coordinates = rectangular.get_coordinates()
             handle_new_coordinates(initial_coordinates)
             
@@ -530,7 +523,7 @@ class PhotoshopApp(Tk):
         cut_btn = FeatureButton(format_multi_frame, Strings.CUT_BTN.value, "images\ic_cut_btn.png")
 
         
-        
+        # cut_edit_frame = MultilFeature(self.custom_container)
         # canvas = Canvas(self.edit_container, width=350, height=310)
         # canvas.pack()
         # cut_edit_frame = self.edit_container
@@ -542,9 +535,6 @@ class PhotoshopApp(Tk):
 
         
         cut_btn.config(command = lambda button=cut_btn: self.on_click_cut_btn(button))
-
-        # padding_left = Label(cut_edit_frame, text=Strings.PADDING_LEFT.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
-
 
         
         rotation_btn = FeatureButton(format_multi_frame, Strings.ROTATION_BTN.value, "images\icon_rotate_btn.png")
