@@ -57,11 +57,41 @@ def load_gif_into_frame(parent: Canvas, gif , w, background = Colors.BACKGROUND.
     
     update_frame(0)
 
+# def saturation_feature(image, factor):
+#     '''
+#     Điều chỉnh độ bảo hòa của ảnh
+
+#     Kỹ thuật: Cân bằng histogram toàn cục
+
+#     Input: 
+#     - image: ảnh đang được chọn
+#     - factor: chỉ số điều chỉnh bảo hòa.
+#             + factor = 0: ảnh gốc
+#             + factor > 0: tăng độ bảo hòa
+#             + factor < 0: giảm độ bảo hòa
+
+#     Output: hình ảnh sau khi xử lý bảo hòa.
+#     '''
+#     saturation_factor = 1 + factor/50
+#     img_arr = np.array(image)
+
+#     img_cvt = cv2.cvtColor(img_arr, cv2.COLOR_BGR2HSV)
+#     img_cvt[:,:,1] = np.clip(img_cvt[:,:,1] * saturation_factor, 0, 255)
+
+#     saturated_array = cv2.cvtColor(img_cvt, cv2.COLOR_HSV2BGR)
+#     saturated_image = Image.fromarray(saturated_array)
+
+#     return saturated_image
+
+import numpy as np
+import cv2
+from PIL import Image
+
 def saturation_feature(image, factor):
     '''
     Điều chỉnh độ bảo hòa của ảnh
 
-    Kỹ thuật: Cân bằng histogram toàn cục
+    Kỹ thuật: Piecewise-Linear Transformation
 
     Input: 
     - image: ảnh đang được chọn
@@ -72,16 +102,24 @@ def saturation_feature(image, factor):
 
     Output: hình ảnh sau khi xử lý bảo hòa.
     '''
-    saturation_factor = 1 + factor/50
     img_arr = np.array(image)
 
     img_cvt = cv2.cvtColor(img_arr, cv2.COLOR_BGR2HSV)
-    img_cvt[:,:,1] = np.clip(img_cvt[:,:,1] * saturation_factor, 0, 255)
+
+    factor_saturate = factor/50
+    
+    # Define piecewise-linear transformation function
+    def piecewise_linear(x):
+        return np.piecewise(x, [x < 128, x >= 128], [lambda x: x * (1 + factor_saturate), lambda x: 255 - (255 - x) * (1 - factor_saturate)])
+
+    # Apply transformation to the saturation channel
+    img_cvt[:,:,1] = piecewise_linear(img_cvt[:,:,1])
 
     saturated_array = cv2.cvtColor(img_cvt, cv2.COLOR_HSV2BGR)
     saturated_image = Image.fromarray(saturated_array)
 
     return saturated_image
+
 
 def brightness_feature(image, factor):
     enhancer = ImageEnhance.Brightness(image)
