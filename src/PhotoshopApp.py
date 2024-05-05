@@ -37,21 +37,30 @@ class PhotoshopApp(Tk):
         button.select_button()
 
     def on_click_cut_btn(self, button: FeatureButton):
-        self.show_selected()
+        self.show_selected_rectangular()
         button.select_button()
 
-    def cut_processing(self, var = None, index = None, mode = None):
+    def cut_processing(self, start_x, start_y, rect_width, rect_height, image_width, image_height):
         max_size = 500
         try:
+            # Tính toán các giá trị cần thiết để cắt ảnh
+            # left = start_x
+            # right = min(start_x + rect_width, image_width)
+            # top = start_y
+            # bottom = min(start_y + rect_height, image_height)   
             left = 0
             top = 0
-            right = 100
-            bottom = 100
+            right = 10
+            bottom = 10
+
+            # Kiểm tra xem tọa độ và kích thước của hình chữ nhật có hợp lệ không
             if max_size >= left >= 0 and max_size >= top >= 0 and max_size >= right >= left and max_size >= bottom >= top:
-                self.temp_img = self.selected_img.crop((left, top, right, bottom))
+                # Cắt ảnh theo hình chữ nhật đã chọn
+                self.temp_img = self.temp_img.crop((left, top, right, bottom))
+                # Hiển thị ảnh đã cắt trên giao diện
                 self.load_image_into_edit(self.temp_img)
-                return
             else:
+                # Hiển thị cảnh báo nếu tọa độ hoặc kích thước không hợp lệ
                 messagebox.showwarning("Cảnh báo", f"Giá trị không hợp lệ. Vui lòng nhập lại với giá trị trong khoảng từ 0 đến {max_size}")
         except ValueError:
             pass
@@ -205,6 +214,26 @@ class PhotoshopApp(Tk):
     def load_image_into_edit(self, image):
         if image is not None:
             self.temp_img = load_image(self.edit_container, image, Sizes.EDIT_FRAME.value, Sizes.EDIT_FRAME.value)
+    def load_image_into_edit_rectangular(self, image):
+        if image is not None:
+            self.temp_img = load_image(self.edit_container, image, Sizes.EDIT_FRAME.value, Sizes.EDIT_FRAME.value)
+            # rectangular =  DragRect(self.edit_container, 10, 10, 300, 200, fill="")
+            # new_coordinates = rectangular.get_coordinates()
+            # print("New coordinates:", list(new_coordinates))
+            def handle_new_coordinates(coordinates):
+                print("New coordinates:", coordinates)
+                
+                self.cut_processing(10, 10, 300, 200, 480, 480)
+        # Tạo đối tượng DragRect và truyền hàm gọi lại vào đó
+            rectangular = DragRect(self.edit_container, 160, 160, 300, 200, fill="", callback=handle_new_coordinates)
+        # In ra tọa độ mới khi khởi tạo
+            initial_coordinates = rectangular.get_coordinates()
+            handle_new_coordinates(initial_coordinates)
+            
+           
+
+            
+
 
     def update_image_into_selected(self):
         if self.temp_img is not None and self.temp_img != self.selected_img:
@@ -241,6 +270,11 @@ class PhotoshopApp(Tk):
     def show_selected(self):
         self.set_selected_img(load_image(self.original_container, self.selected_img, Sizes.ORIGINAL_FRAME.value, Sizes.ORIGINAL_FRAME.value))
         self.load_image_into_edit(self.selected_img)
+        self.temp_img = self.selected_img
+
+    def show_selected_rectangular(self):
+        self.set_selected_img(load_image(self.original_container, self.selected_img, Sizes.ORIGINAL_FRAME.value, Sizes.ORIGINAL_FRAME.value))
+        self.load_image_into_edit_rectangular(self.selected_img)
         self.temp_img = self.selected_img
 
     def run(self):
@@ -383,6 +417,15 @@ class PhotoshopApp(Tk):
         self.edit_container.pack(padx=10, pady=10)
         self.edit_container.pack_propagate(False)
 
+        
+
+        # canvas = Canvas(self.edit_container, width=350, height=310)
+        # canvas.pack()
+        # DragRect(canvas, 10, 10, 150, 110, fill="")
+        # DragRect(canvas,0, 0, 150, 110, fill="")
+        # DragRect(self.edit_container, 10, 10, 150, 110, fill="")
+
+
         self.choice_frame = Frame(parent, width=950, height=100,
                               bg=Colors.BACKGROUND.value)
         self.choice_frame.pack(side=BOTTOM)
@@ -485,15 +528,17 @@ class PhotoshopApp(Tk):
         self.bottom_img.set(str(0))
 
         cut_btn = FeatureButton(format_multi_frame, Strings.CUT_BTN.value, "images\ic_cut_btn.png")
-        cut_edit_frame = MultilFeature(self.edit_container)
-        cut_btn.set_frame(cut_edit_frame)
-        
-    
-        
 
-        canvas = Canvas(cut_edit_frame, width=350, height=310)
-        canvas.pack()
-        drag_rect = DragRect(canvas, 0, 0, 350, 310, fill="")
+        
+        
+        # canvas = Canvas(self.edit_container, width=350, height=310)
+        # canvas.pack()
+        # cut_edit_frame = self.edit_container
+        # cut_btn.set_frame(cut_edit_frame)
+        # DragRect(self.edit_container, 10, 10, 100, 10, fill="")
+
+        
+        # drag_rect = DragRect(cut_edit_frame, 0, 0, 350, 310, fill="")
 
         
         cut_btn.config(command = lambda button=cut_btn: self.on_click_cut_btn(button))
