@@ -13,6 +13,10 @@ def get_image(image_path):
     image = Image.open(image_path)
     return image
 
+def rotate_image(image, degrees):
+    rotated_image = image.rotate(degrees, expand=True)
+    return rotated_image
+
 def resize_image(image: Image,  w, h):
     aspect_ratio = image.width / image.height
     new_width = w if aspect_ratio >= 1 else int(w * aspect_ratio)
@@ -118,16 +122,89 @@ def saturation_feature(image, factor):
 
     return saturated_image
 
+def rotate_image(image, angle):
+    rotated_image = image.rotate(angle, expand=True)
+    return rotated_image
 
 def brightness_feature(image, factor):
-    enhancer = ImageEnhance.Brightness(image)
-    brightened_image = enhancer.enhance(1 + factor/50)
-    return brightened_image
+    '''
+    Điều chỉnh độ sáng của ảnh
+
+    Kỹ thuật: Điều chỉnh kênh L (Lightness) trong không gian màu Lab
+
+    Input: 
+    - image: ảnh đang được chọn
+    - factor: chỉ số điều chỉnh độ sáng.
+            + factor = 0: ảnh gốc
+            + factor > 0: tăng độ sáng
+            + factor < 0: giảm độ sáng
+
+    Output: hình ảnh sau khi xử lý độ sáng.
+    '''
+    brightness_factor = factor
+    img_arr = np.array(image)
+
+    # Chuyển đổi ảnh sang không gian màu Lab
+    lab_img = cv2.cvtColor(img_arr, cv2.COLOR_RGB2LAB)
+
+    # Tách các kênh màu
+    L, a, b = cv2.split(lab_img)
+
+    # Điều chỉnh kênh L (độ sáng)
+    adjusted_L = np.clip(L.astype(np.int16) + brightness_factor, 0, 255).astype(np.uint8)
+    # Kết hợp lại các kênh màu
+    adjusted_lab_img = cv2.merge((adjusted_L, a, b))
+    # Chuyển đổi ảnh trở lại không gian màu RGB
+    adjusted_rgb_img = cv2.cvtColor(adjusted_lab_img, cv2.COLOR_LAB2RGB)
+    adjusted_image = Image.fromarray(adjusted_rgb_img)
+    return adjusted_image
+
+import cv2
+import numpy as np
+from PIL import Image
+
+import cv2
+import numpy as np
+from PIL import Image
 
 def contrast_feature(image, factor):
-    enhancer = ImageEnhance.Contrast(image)
-    contrasted_image = enhancer.enhance(1 + factor/50)
-    return contrasted_image
+    '''
+    Điều chỉnh độ tương phản của ảnh
+
+    Kỹ thuật: Điều chỉnh kênh L (Lightness) trong không gian màu Lab
+
+    Input: 
+    - image: ảnh đang được chọn
+    - factor: chỉ số điều chỉnh độ tương phản.
+            + factor = 0: ảnh gốc
+            + factor > 0: tăng độ tương phản
+            + factor < 0: giảm độ tương phản
+
+    Output: hình ảnh sau khi xử lý độ tương phản.
+    '''
+    factor = 1 +factor/50
+    contrast_factor = factor
+    img_arr = np.array(image)
+
+    # Chuyển đổi ảnh sang không gian màu Lab
+    lab_img = cv2.cvtColor(img_arr, cv2.COLOR_RGB2LAB)
+
+    # Tách các kênh màu
+    L, a, b = cv2.split(lab_img)
+
+    # Điều chỉnh kênh L (độ sáng)
+    mean_L = np.mean(L)
+    adjusted_L = np.clip((L - mean_L) * contrast_factor + mean_L, 0, 255).astype(np.uint8)
+
+    # Kết hợp lại các kênh màu
+    adjusted_lab_img = cv2.merge((adjusted_L, a, b))
+
+    # Chuyển đổi ảnh trở lại không gian màu RGB
+    adjusted_rgb_img = cv2.cvtColor(adjusted_lab_img, cv2.COLOR_LAB2RGB)
+
+    adjusted_image = Image.fromarray(adjusted_rgb_img)
+
+    return adjusted_image
 
 def sharpen_feature(image, sigma, strength=1.5, median_kernel_size=3):
 

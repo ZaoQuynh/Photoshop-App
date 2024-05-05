@@ -171,3 +171,55 @@ class FeatureButton(Button):
                 btn.config(bg = Colors.BTN_COLOR.value)
                 btn.hide_frame()
 
+class DragRect:
+    def __init__(self, target, x, y, width, height, callback=None, **kwargs):
+        self.target = target
+        self.callback = callback
+        self.rect = target.create_rectangle(x, y, x + width, y + height, outline="red", stipple="gray25", **kwargs)
+        self.start_x = 0
+        self.start_y = 0
+        self.target.tag_bind(self.rect, '<ButtonPress-1>', self.on_press)
+        self.target.tag_bind(self.rect, '<B1-Motion>', self.on_drag)
+        
+        # Create handle circles at the corners
+        self.handle_radius = 3
+        self.handle1 = target.create_oval(x - self.handle_radius, y - self.handle_radius,
+                                          x + self.handle_radius, y + self.handle_radius,
+                                          fill="blue", tags="handle1")
+        self.handle2 = target.create_oval(x + width - self.handle_radius, y + height - self.handle_radius,
+                                          x + width + self.handle_radius, y + height + self.handle_radius,
+                                          fill="blue", tags="handle2")
+        
+        # Bind events to handle circles
+        self.target.tag_bind("handle1", '<ButtonPress-1>', lambda event, corner="top_left": self.on_press(event, corner))
+        self.target.tag_bind("handle2", '<ButtonPress-1>', lambda event, corner="bottom_right": self.on_press(event, corner))
+        self.target.tag_bind("handle1", '<B1-Motion>', lambda event, corner="top_left": self.on_drag(event, corner))
+        self.target.tag_bind("handle2", '<B1-Motion>', lambda event, corner="bottom_right": self.on_drag(event, corner))
+        
+    def on_press(self, event, corner):
+        self.start_x = event.x
+        self.start_y = event.y
+        self.corner = corner
+        
+    def on_drag(self, event, corner):
+        dx = event.x - self.start_x
+        dy = event.y - self.start_y
+        self.start_x = event.x
+        self.start_y = event.y
+        coords = self.target.coords(self.rect)
+        if corner == "top_left":
+            self.target.coords(self.rect, coords[0] + dx, coords[1] + dy, coords[2], coords[3])
+            self.target.coords("handle1", coords[0] - self.handle_radius, coords[1] - self.handle_radius,
+                                coords[0] + self.handle_radius, coords[1] + self.handle_radius)
+        elif corner == "bottom_right":
+            self.target.coords(self.rect, coords[0], coords[1], coords[2] + dx, coords[3] + dy)
+            self.target.coords("handle2", coords[2] - self.handle_radius, coords[3] - self.handle_radius,
+                                coords[2] + self.handle_radius, coords[3] + self.handle_radius)
+        
+        # Gọi hàm gọi lại với tọa độ mới nếu có
+        if self.callback:
+            new_coordinates = self.get_coordinates()
+            self.callback(new_coordinates)
+            
+    def get_coordinates(self):
+        return self.target.coords(self.rect)
