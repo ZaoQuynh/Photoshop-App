@@ -248,7 +248,6 @@ class PhotoshopApp(Tk):
     def load_image_into_edit(self, image):
         if image is not None:
             self.temp_img = load_image(self.edit_container, image, Sizes.EDIT_FRAME.value, Sizes.EDIT_FRAME.value)
-            print("hihi1")
             print(self.temp_img.width)
             print(self.temp_img.height)
             
@@ -314,7 +313,6 @@ class PhotoshopApp(Tk):
         if(len(self.edit_step) > 0):
             self.set_selected_img(self.edit_step.pop())
             self.show_selected()
-            print("Undo")
 
     def restart(self):
         self.set_selected_img(None)
