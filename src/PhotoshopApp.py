@@ -6,6 +6,17 @@ from ImageProcessor import *
 from tkinter import messagebox
 from PIL import Image, ImageTk, ImageDraw
 import webbrowser
+from Constraint import *
+
+mode_names = {
+    Image.NEAREST: "NEAREST",
+    Image.BILINEAR: "BILINEAR",
+    Image.BICUBIC: "BICUBIC",
+}
+
+class EResizeMode(Enum):
+    No_Ratio = 0
+    Ratio = 1
 
 class PhotoshopApp(Tk):
     def __init__(self):
@@ -21,6 +32,8 @@ class PhotoshopApp(Tk):
         self.selected_button:Button = None
         self.prevPoint = [0,0]
         self.currentPoint = [0,0]
+        self.type_resize = Image.BICUBIC
+        self.resize_mode  = EResizeMode.No_Ratio
 
         self.main_view()
 
@@ -85,11 +98,56 @@ class PhotoshopApp(Tk):
 
 
     def on_click_resize_btn(self, button: FeatureButton):
+        self.set_type_resize(Image.BICUBIC)
         self.show_selected()
         w, h = self.selected_img.size
         self.w_img.set(int(w))
         self.h_img.set(int(h))
         button.select_button()
+
+    def on_click_resize_option1_btn(self, button: FeatureButton):
+        self.show_selected()
+        button.select_button()
+        w, h = self.selected_img.size
+        self.w_img.set(int(w))
+        self.h_img.set(int(h))
+        self.set_type_resize(Image.BICUBIC)
+
+    def on_click_resize_option2_btn(self, button: FeatureButton):
+        self.show_selected()
+        button.select_button()
+        w, h = self.selected_img.size
+        self.w_img.set(int(w))
+        self.h_img.set(int(h))
+        self.set_type_resize(Image.BILINEAR)
+
+    def on_click_resize_option3_btn(self, button: FeatureButton):
+        self.show_selected()
+        button.select_button()
+        w, h = self.selected_img.size
+        self.w_img.set(int(w))
+        self.h_img.set(int(h))
+        self.set_type_resize(Image.NEAREST)
+
+    def set_resize_mode(self, resize_mode):
+        self.resize_mode = resize_mode
+
+    def on_click_resize_option21_btn(self, button: FeatureButton):
+        self.show_selected()
+        button.select_button()
+        w, h = self.selected_img.size
+        self.w_img.set(int(w))
+        self.h_img.set(int(h))
+        self.set_resize_mode(EResizeMode.No_Ratio)
+
+    def on_click_resize_option22_btn(self, button: FeatureButton):
+        self.show_selected()
+        button.select_button()
+        w, h = self.selected_img.size
+        self.w_img.set(int(w))
+        self.h_img.set(int(h))
+        self.set_resize_mode(EResizeMode.Ratio)
+
 
     def on_click_brightness_btn(self, button: FeatureButton):
         self.show_selected()
@@ -245,9 +303,9 @@ class PhotoshopApp(Tk):
             self.set_selected_img(load_image(self.original_container, image, Sizes.ORIGINAL_FRAME.value, Sizes.ORIGINAL_FRAME.value))
             self.load_image_into_edit(image)
 
-    def load_image_into_edit(self, image):
+    def load_image_into_edit(self, image, type_resize = Image.BICUBIC):
         if image is not None:
-            self.temp_img = load_image(self.edit_container, image, Sizes.EDIT_FRAME.value, Sizes.EDIT_FRAME.value)
+            self.temp_img = load_image(self.edit_container, image, Sizes.EDIT_FRAME.value, Sizes.EDIT_FRAME.value, type_resize)
             print(self.temp_img.width)
             print(self.temp_img.height)
             
@@ -343,30 +401,52 @@ class PhotoshopApp(Tk):
             self.start_frame.pack(side="right", fill="both", expand=True)
             self.inner_frame.destroy()
 
+    def set_type_resize(self, type_resize):
+        self.type_resize = type_resize
+
     def resize_processing(self):
         self.width_status.grid_forget()
         self.height_status.grid_forget()
         max = Sizes.MAX_IMG.value
         min = Sizes.MIN_IMG.value
+        w, h = self.selected_img.size
 
         try:
-            temp_w = int(self.w_img.get())
-            temp_h = int(self.h_img.get())
+            temp_w, temp_h = self.resize_w_h(w, h)
 
-            if max >= temp_w >= min and max >= temp_h >= min:
-                self.temp_img = self.selected_img.resize((temp_w, temp_h), Image.BICUBIC)
-                self.load_image_into_edit(self.temp_img)
-                self.width_status.grid(row=2, column=2, padx=5, pady=5)
-                self.height_status.grid(row=3, column=2, padx=5, pady=5)
-                return
-            else:
-                messagebox.showwarning("Cảnh báo", f"Kích thước không phù hợp. Vui lòng nhập lại với kích thước trong khoảng {min} đến {max}")
+            # if max >= temp_w >= min and max >= temp_h >= min:
+            self.temp_img = self.selected_img.resize((temp_w, temp_h), self.type_resize)
+            print(mode_names[self.type_resize])
+            self.load_image_into_edit(self.temp_img, self.type_resize)
+            self.width_status.grid(row=2, column=2, padx=5, pady=5)
+            self.height_status.grid(row=3, column=2, padx=5, pady=5)
+            
+            self.w_img.set(str(temp_w))
+            self.h_img.set(str(temp_h))
+            return
+            # else:
+            #     messagebox.showwarning("Cảnh báo", f"Kích thước không phù hợp. Vui lòng nhập lại với kích thước trong khoảng {min} đến {max}")
         except ValueError:
             pass
              
-        w, h = self.selected_img.size
         self.w_img.set(str(w))
         self.h_img.set(str(h))
+
+    def resize_w_h(self, w, h):
+        temp_w = w
+        temp_h = h
+        if(self.resize_mode == EResizeMode.No_Ratio):
+            temp_w = int(self.w_img.get())
+            temp_h = int(self.h_img.get())
+        else:
+            if (self.w_img.get() != w):
+                temp_w = int(self.w_img.get())
+                temp_h = int((temp_w*h)/w)
+            else:
+                temp_h = int(self.h_img.get())
+                temp_w = int((temp_h*w)/h)
+        return temp_w, temp_h
+
 
     # Draw View
 
@@ -495,7 +575,7 @@ class PhotoshopApp(Tk):
         self.start_frame.pack_propagate(False)
 
         #Background
-        # load_gif_into_frame(self.start_frame, "gifs\_background.gif", Sizes.WIDTH_RIGHT.value)
+        load_gif_into_frame(self.start_frame, "gifs\_background.gif", Sizes.WIDTH_RIGHT.value)
 
 
         infor_frame = CTkFrame(self.start_frame, bg_color=Colors.BACKGROUND_V2.value)
@@ -537,16 +617,16 @@ class PhotoshopApp(Tk):
         school_infor = CTkLabel(infor_frame_left, text="Trường Đại Học Sư Phạm Kỹ Thuật TP.HCM")
         school_infor.grid(row=0, column=1, padx=10, pady=2)
 
-        subject_label = CTkLabel(infor_frame_left, text="Môn:")
+        subject_label = CTkLabel(infor_frame_left, text="Đề tài:")
         subject_label.grid(row=1, column=0, padx=10, pady=2)
 
-        subject_infor = CTkLabel(infor_frame_left, text="Xử lý ảnh số")
+        subject_infor = CTkLabel(infor_frame_left, text="Ứng dụng XLAS trong chỉnh sửa ảnh")
         subject_infor.grid(row=1, column=1, padx=10, pady=2)
 
         teacher_label = CTkLabel(infor_frame_left, text="GVHD:")
         teacher_label.grid(row=2, column=0, padx=10, pady=2)
 
-        teacher_infor = CTkLabel(infor_frame_left, text="PGS.TS Hoàng Văn Dũng")
+        teacher_infor = CTkLabel(infor_frame_left, text="PGS.TS. Hoàng Văn Dũng")
         teacher_infor.grid(row=2, column=1, padx=10, pady=2)
 
         github_image = ImageTk.PhotoImage(Image.open("images\ic_github.png").resize((20, 20), Image.BICUBIC))
@@ -644,11 +724,60 @@ class PhotoshopApp(Tk):
         self.w_img.set(str(0))
         self.h_img.set(str(0))
 
-        resize_edit_frame_label = Label(resize_edit_frame, text="Nhấn Enter để thiết lập giá trị biến đổi!", background = Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
-        resize_edit_frame_label.grid(row=0, column=0, columnspan=2, padx=5, pady=5)
+        otps_frame = MultilFeature(resize_btn.get_frame())
 
-        resize_edit_frame_note = Label(resize_edit_frame, text= f"Lưu ý: Nhập giá trị trong khoảng {Sizes.MIN_IMG.value} đến {Sizes.MAX_IMG.value}", background = Colors.BACKGROUND_V2.value, fg=Colors.TEXT_NOTE.value)
-        resize_edit_frame_note.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
+        options = []
+
+        resize_option1 = FeatureButton(otps_frame, "BICUBIC", img_path = None,
+                 background = Colors.BTN_COLOR.value, 
+                 color_border = Colors.BORDER_COLOR.value,
+                 width_size = 10)
+        resize_option1.config(command = lambda button=resize_option1: self.on_click_resize_option1_btn(button))
+        resize_option2 = FeatureButton(otps_frame, "BILINEAR", img_path = None,
+                 background = Colors.BTN_COLOR.value, 
+                 color_border = Colors.BORDER_COLOR.value,
+                 width_size = 10)
+        resize_option2.config(command = lambda button=resize_option2: self.on_click_resize_option2_btn(button))
+
+        resize_option3 = FeatureButton(otps_frame, "NEAREST", img_path = None,
+                 background = Colors.BTN_COLOR.value, 
+                 color_border = Colors.BORDER_COLOR.value,
+                 width_size = 10)
+        resize_option3.config(command = lambda button=resize_option3: self.on_click_resize_option3_btn(button))
+
+        options.append(resize_option1)
+        options.append(resize_option2)
+        options.append(resize_option3)
+
+        otps_frame.set_btns(options)
+
+        otps_frame.grid(row=0, column=0, columnspan=3)
+
+        otps2_frame = MultilFeature(resize_btn.get_frame())
+        options2 = []
+
+        resize_option21 = FeatureButton(otps2_frame, "No Ratio", img_path = None,
+                 background = Colors.BTN_COLOR.value, 
+                 color_border = Colors.BORDER_COLOR.value,
+                 width_size = 10)
+        resize_option21.config(command = lambda button=resize_option21: self.on_click_resize_option21_btn(button))
+        resize_option22 = FeatureButton(otps2_frame, "Ratio", img_path = None,
+                 background = Colors.BTN_COLOR.value, 
+                 color_border = Colors.BORDER_COLOR.value,
+                 width_size = 10)
+        resize_option22.config(command = lambda button=resize_option22: self.on_click_resize_option22_btn(button))
+
+        options2.append(resize_option21)
+        options2.append(resize_option22)
+
+        otps2_frame.set_btns(options2)
+
+        otps2_frame.grid(row=1, column=0, columnspan=3)
+        # resize_edit_frame_label = Label(resize_edit_frame, text="Nhấn Enter để thiết lập giá trị biến đổi!", background = Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
+        # resize_edit_frame_label.grid(row=0, column=0, columnspan=2, padx=5, pady=5)
+
+        # resize_edit_frame_note = Label(resize_edit_frame, text= f"Lưu ý: Nhập giá trị trong khoảng {Sizes.MIN_IMG.value} đến {Sizes.MAX_IMG.value}", background = Colors.BACKGROUND_V2.value, fg=Colors.TEXT_NOTE.value)
+        # resize_edit_frame_note.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
         
         width_label = Label(resize_edit_frame, text=Strings.WIDTH_TEXT.value, background = Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
         width_label.grid(row=2, column=0, padx=5, pady=5)
