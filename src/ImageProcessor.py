@@ -18,19 +18,19 @@ def rotate_image(image, degrees):
     rotated_image = image.rotate(degrees, expand=True)
     return rotated_image
 
-def resize_image(image: Image,  w, h):
+def resize_image(image: Image,  w, h, type = Image.BICUBIC):
     aspect_ratio = image.width / image.height
     new_width = w if aspect_ratio >= 1 else int(w * aspect_ratio)
     new_height = h if aspect_ratio <= 1 else int(h / aspect_ratio)
-    image = image.resize((new_width, new_height), Image.BICUBIC)
+    image = image.resize((new_width, new_height), type)
 
     margin_right = (w - new_width)/2
     margin_top = (h - new_height)/2
     
     return image, margin_right, margin_top
 
-def load_image(parent: Canvas, image, w, h):
-    resized_img, x, y = resize_image(image,  w, h)
+def load_image(parent: Canvas, image, w, h, type_resize = Image.BICUBIC):
+    resized_img, x, y = resize_image(image,  w, h, type_resize)
     photo = ImageTk.PhotoImage(resized_img)
     parent.delete("all")
     parent.create_image(x, y, anchor=NW, image=photo)
