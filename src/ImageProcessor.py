@@ -3,6 +3,7 @@ from tkinter import filedialog
 from PIL import Image, ImageTk, ImageEnhance
 import cv2
 import numpy as np
+from PIL import Image, ImageFilter
 from Components import *
 
 def selected_image_path():
@@ -120,7 +121,30 @@ def saturation_feature(image, factor):
     saturated_array = cv2.cvtColor(img_cvt, cv2.COLOR_HSV2BGR)
     saturated_image = Image.fromarray(saturated_array)
 
-    return saturated_image
+    return saturated_image 
+
+def blur_feature(image, factor):
+    '''
+    Điều chỉnh độ mờ của ảnh
+    
+    Kỹ thuật: Sử dụng bộ lọc làm mờ Gaussian
+
+    Input: 
+    - image: ảnh đang được chọn
+    - factor: chỉ số điều chỉnh độ mờ.
+        + factor = 0: ảnh gốc
+        + factor > 0: tăng độ mờ (tăng bán kính bộ lọc)
+    
+    Output: hình ảnh sau khi xử lý độ mờ.
+    '''
+    blur_factor = 0 + abs(factor)/10
+    blur_radius = int(blur_factor * 3)
+
+    img_arr = np.array(image)
+    kernel_size = (blur_radius * 2 + 1, blur_radius * 2 + 1)
+    blurred_img = cv2.GaussianBlur(img_arr, kernel_size, 0)
+    blurred_image = Image.fromarray(blurred_img)
+    return blurred_image
 
 def rotate_image(image, angle):
     rotated_image = image.rotate(angle, expand=True)
@@ -231,6 +255,14 @@ def sharpen_feature(image, sigma, strength=1.5, median_kernel_size=3):
     sharpened = Image.fromarray(cv2.cvtColor(unsharp, cv2.COLOR_BGR2RGB))
 
     return sharpened
+
+def smoothing_feature(image, factor):
+    
+    image_np = np.array(image)
+    bil_blur = cv2.bilateralFilter(image_np, 13, factor, factor)
+    smooth_img = Image.fromarray(bil_blur)
+
+    return smooth_img
 
 def color_filter(image, s1, s2, s3, factor):
     '''
