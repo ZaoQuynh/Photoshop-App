@@ -257,7 +257,6 @@ class PhotoshopApp(Tk):
             self.temp_img = load_image(self.edit_container, image, Sizes.EDIT_FRAME.value, Sizes.EDIT_FRAME.value)
             def handle_new_coordinates(coordinates):
                 print("New coordinates:", coordinates)
-                # self.cut_processing(coordinates[0], coordinates[1], coordinates[2], coordinates[3])
             
             a = Canvas(self.edit_container, width=Sizes.EDIT_FRAME.value, height=Sizes.EDIT_FRAME.value,
                             bg=Colors.BACKGROUND_V2.value)
@@ -268,18 +267,14 @@ class PhotoshopApp(Tk):
             initial_coordinates = rectangular.get_coordinates()
             handle_new_coordinates(initial_coordinates)
 
-            # Tạo một đối tượng Label để đại diện cho phần từ phía dưới
-            label_under = Label(root, text="Phần từ phía dưới", bg="lightblue")
+            label_under = Label(self, text="Phần từ phía dưới", bg="lightblue")
             label_under.pack()
 
-            # Tạo một canvas với nền trong suốt
             canvas = Canvas(self.edit_container, width=200, height=200, highlightthickness=0, bg="white", bd=0)
             canvas.pack()
 
-            # Đặt nền của canvas thành trong suốt
             canvas.configure(bg="white", highlightthickness=0)
 
-            # Vẽ một hình tròn trên canvas
             circle = canvas.create_oval(50, 50, 150, 150, fill="red")
 
     def update_image_into_selected(self):
@@ -681,7 +676,7 @@ class PhotoshopApp(Tk):
         format_btn_update = FeatureButton(format_multi_frame, Strings.UPDATE_BTN.value, "images\ic_update_btn.png")
         format_btn_update.config(command = lambda: self.update_image_into_selected())
 
-        format_btns.append(cut_btn)
+        # format_btns.append(cut_btn)
         format_btns.append(rotation_btn)
         format_btns.append(resize_btn)
         format_btns.append(format_btn_update)
@@ -885,6 +880,6 @@ class PhotoshopApp(Tk):
         feature_btns.append(self.sharpen_btn)
         feature_btns.append(self.smoothing_btn)
         feature_btns.append(color_filter_btn)
-        feature_btns.append(draw_btn)
+        # feature_btns.append(draw_btn)
 
         parent.set_btns(feature_btns)
