@@ -37,18 +37,19 @@ class PhotoshopApp(Tk):
         button.select_button()
 
     def on_click_cut_btn(self, button: FeatureButton):
-        self.show_selected_rectangular()
+        self.show_selected()
+        # self.show_selected_rectangular()
         button.select_button()
 
 
-    def cut_processing(self, left, top,right , bottom):
+# , left, top,right , bottom
+    def cut_processing(self):
+        left = int(self.left_img.get())
+        right = int(self.right_img.get())
+        top = int(self.top_img.get())
+        bottom = int(self.bottom_img.get())
+
         max_size = 1000000
-        print(left, top,right , bottom)
-        # top = top + 310
-        left = 0
-        top = 0
-        right = 1200
-        bottom = 670
         try: 
             # Kiểm tra xem tọa độ và kích thước của hình chữ nhật có hợp lệ không
             if max_size >= left >= 0 and max_size >= top >= 0 and max_size >= right >= left and max_size >= bottom >= top:
@@ -58,7 +59,7 @@ class PhotoshopApp(Tk):
                 self.load_image_into_edit(self.temp_img)
             else:
                 # Hiển thị cảnh báo nếu tọa độ hoặc kích thước không hợp lệ
-                messagebox.showwarning("Cảnh báo", f"Giá trị không hợp lệ. Vui lòng nhập lại với giá trị trong khoảng từ 0 đến {max_size}")
+                messagebox.showwarning("Cảnh báo", f"Giá trị không hợp lệ. Vui lòng nhập lại với giá trị")
         except ValueError:
             messagebox.showwarning("Cảnh báo", f"Lỗi")
             pass
@@ -212,21 +213,40 @@ class PhotoshopApp(Tk):
     def load_image_into_edit(self, image):
         if image is not None:
             self.temp_img = load_image(self.edit_container, image, Sizes.EDIT_FRAME.value, Sizes.EDIT_FRAME.value)
+            print("hihi1")
+            print(self.temp_img.width)
+            print(self.temp_img.height)
+            
 
     def load_image_into_edit_rectangular(self, image):
         if image is not None:
             self.temp_img = load_image(self.edit_container, image, Sizes.EDIT_FRAME.value, Sizes.EDIT_FRAME.value)
             def handle_new_coordinates(coordinates):
                 print("New coordinates:", coordinates)
-                self.cut_processing(coordinates[0], coordinates[1], coordinates[2], coordinates[3])
-            rectangular = DragRect(self.edit_container, 0, 110, 480, 260, fill="", callback=handle_new_coordinates)
+                # self.cut_processing(coordinates[0], coordinates[1], coordinates[2], coordinates[3])
+            
+            a = Canvas(self.edit_container, width=Sizes.EDIT_FRAME.value, height=Sizes.EDIT_FRAME.value,
+                            bg=Colors.BACKGROUND_V2.value)
+            a.pack(padx=10, pady=10)
+            a.pack_propagate(False)
+
+            rectangular = DragRect(a, 0, 60, self.temp_img.width, self.temp_img.height, fill="", callback=handle_new_coordinates)
             initial_coordinates = rectangular.get_coordinates()
             handle_new_coordinates(initial_coordinates)
-            
-           
 
-            
+            # Tạo một đối tượng Label để đại diện cho phần từ phía dưới
+            label_under = Label(root, text="Phần từ phía dưới", bg="lightblue")
+            label_under.pack()
 
+            # Tạo một canvas với nền trong suốt
+            canvas = Canvas(self.edit_container, width=200, height=200, highlightthickness=0, bg="white", bd=0)
+            canvas.pack()
+
+            # Đặt nền của canvas thành trong suốt
+            canvas.configure(bg="white", highlightthickness=0)
+
+            # Vẽ một hình tròn trên canvas
+            circle = canvas.create_oval(50, 50, 150, 150, fill="red")
 
     def update_image_into_selected(self):
         if self.temp_img is not None and self.temp_img != self.selected_img:
@@ -521,17 +541,38 @@ class PhotoshopApp(Tk):
         self.bottom_img.set(str(0))
 
         cut_btn = FeatureButton(format_multi_frame, Strings.CUT_BTN.value, "images\ic_cut_btn.png")
-
-        
-        # cut_edit_frame = MultilFeature(self.custom_container)
+        cut_edit_frame = MultilFeature(self.custom_container)
         # canvas = Canvas(self.edit_container, width=350, height=310)
         # canvas.pack()
         # cut_edit_frame = self.edit_container
-        # cut_btn.set_frame(cut_edit_frame)
+        cut_btn.set_frame(cut_edit_frame)
         # DragRect(self.edit_container, 10, 10, 100, 10, fill="")
-
-        
         # drag_rect = DragRect(cut_edit_frame, 0, 0, 350, 310, fill="")
+
+        padding_left = Label(cut_edit_frame, text=Strings.PADDING_LEFT.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
+        padding_left.grid(row=0, column=0, padx=5, pady=5)
+        padding_left_input = CTkEntry(cut_edit_frame, textvariable=self.left_img)
+        padding_left_input.grid(row=0, column=1, padx=5, pady=5)
+
+        padding_top = Label(cut_edit_frame, text=Strings.PADDING_TOP.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
+        padding_top.grid(row=1, column=0, padx=5, pady=5)
+        padding_top_input = CTkEntry(cut_edit_frame, textvariable=self.top_img)
+        padding_top_input.grid(row=1, column=1, padx=5, pady=5)
+
+        padding_right = Label(cut_edit_frame, text=Strings.PADDING_RIGHT.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
+        padding_right.grid(row=2, column=0, padx=5, pady=5)
+        padding_right_input = CTkEntry(cut_edit_frame, textvariable=self.right_img)
+        padding_right_input.grid(row=2, column=1, padx=5, pady=5)
+
+        padding_bottom = Label(cut_edit_frame, text=Strings.PADDING_BOTTOM.value, background=Colors.BACKGROUND_V2.value, fg=Colors.TEXT_HIGHTLIGHT_COLOR.value)
+        padding_bottom.grid(row=3, column=0, padx=5, pady=5)
+        padding_bottom_input = CTkEntry(cut_edit_frame, textvariable=self.bottom_img)
+        padding_bottom_input.grid(row=3, column=1, padx=5, pady=5)
+
+        padding_bottom_input.bind("<Return>", lambda event: self.cut_processing())
+        padding_top_input.bind("<Return>", lambda event: self.cut_processing())
+        padding_right_input.bind("<Return>", lambda event: self.cut_processing())
+        padding_left_input.bind("<Return>", lambda event: self.cut_processing())
 
         
         cut_btn.config(command = lambda button=cut_btn: self.on_click_cut_btn(button))
